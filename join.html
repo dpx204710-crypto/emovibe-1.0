@@ -68,3 +68,45 @@
   </script>
 </body>
 </html>
+<script type="module">
+import { supabase } from './assets/supabase.js'
+
+// 注册新用户
+document.getElementById('joinForm').addEventListener('submit', async (e) => {
+  e.preventDefault()
+
+  const email = document.getElementById('email').value
+  const password = document.getElementById('password').value
+  const username = document.getElementById('username').value
+
+  // 创建账号
+  const { data, error } = await supabase.auth.signUp({
+    email,
+    password,
+    options: {
+      data: { username } // 保存用户名
+    }
+  })
+
+  if (error) {
+    alert('注册失败：' + error.message)
+    return
+  }
+
+  // 在 profiles 表中创建用户资料
+  const user = data.user
+  if (user) {
+    await supabase.from('profiles').insert([
+      {
+        user_id: user.id,
+        username: username,
+        avatar_url: '',
+        bio: '这个人很神秘，还没有写简介～'
+      }
+    ])
+  }
+
+  alert('注册成功！请返回登录页面登录')
+  window.location.href = 'login.html'
+})
+</script>
