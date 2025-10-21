@@ -117,3 +117,15 @@
   <script src="assets/login.js"></script>
 </body>
 </html>
+<script>
+function handleLogin() {
+  const username = document.getElementById("username").value.trim();
+  if (!username) {
+    alert("请输入昵称");
+    return;
+  }
+  localStorage.setItem("emovibe_user", username);
+  window.location.href = "chat.html";
+}
+</script>
+<button onclick="handleLogin()">进入聊天室</button>
