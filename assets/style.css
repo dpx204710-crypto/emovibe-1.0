@@ -1,98 +1,124 @@
-/* === Emovibe 黑金风格主题 === */
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap');
+/* 🌈 Emovibe Style - 让生活充满温暖 */
 
 body {
+  font-family: "Microsoft YaHei", "Segoe UI", sans-serif;
+  background: linear-gradient(135deg, #e3f2fd, #bbdefb);
   margin: 0;
-  font-family: 'Poppins', sans-serif;
-  background: radial-gradient(circle at center, #111 0%, #000 100%);
-  color: #f5f5f5;
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
+  padding: 0;
+  text-align: center;
+  color: #333;
 }
 
-/* Header */
+/* 顶部导航栏 */
 header {
-  width: 100%;
-  background: linear-gradient(to right, #000, #111);
-  color: gold;
-  padding: 1rem 2rem;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  box-shadow: 0 0 10px gold;
+  background-color: #4b9cd3;
+  color: #fff;
+  padding: 15px 10px;
+  font-size: 20px;
+  font-weight: bold;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-header h1 {
-  font-size: 1.5rem;
-  font-weight: 600;
-  letter-spacing: 2px;
-  color: gold;
-}
-
-nav a {
-  color: #f5f5f5;
-  margin: 0 10px;
-  text-decoration: none;
-  transition: color 0.3s;
-}
-
-nav a:hover {
-  color: gold;
-}
-
-#language-switch {
-  background: #000;
-  color: gold;
-  border: 1px solid gold;
-  padding: 5px 8px;
-  border-radius: 4px;
-}
-
-/* Main Section */
+/* 主体文字 */
 main {
-  text-align: center;
-  margin-top: 5rem;
-  max-width: 600px;
+  padding: 30px 20px;
 }
 
-main h2 {
-  font-size: 2rem;
-  color: gold;
-  margin-bottom: 1rem;
+h2 {
+  margin-top: 20px;
+  color: #2b7bb9;
+  font-size: 24px;
 }
 
-main p {
-  color: #ddd;
-  font-size: 1.1rem;
-  line-height: 1.6;
-  margin-bottom: 2rem;
+p {
+  color: #444;
+  font-size: 16px;
+  margin-top: 10px;
 }
 
-.button {
-  background: gold;
-  color: #000;
-  padding: 0.8rem 1.6rem;
-  border-radius: 25px;
-  font-weight: 600;
+/* 按钮样式 */
+.btn-group {
+  margin-top: 40px;
+}
+
+.btn {
+  display: inline-block;
+  background: #4b9cd3;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 8px;
   text-decoration: none;
-  transition: all 0.3s;
+  margin: 10px;
+  font-size: 16px;
+  font-weight: 500;
+  transition: all 0.3s ease;
 }
 
-.button:hover {
-  background: #fff;
-  color: #000;
+.btn:hover {
+  background: #357aa8;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 10px rgba(75, 156, 211, 0.4);
 }
 
-/* Footer */
+/* 登录、输入框样式 */
+input, textarea {
+  width: 80%;
+  max-width: 350px;
+  padding: 10px;
+  margin: 10px auto;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  display: block;
+  font-size: 15px;
+  box-sizing: border-box;
+}
+
+input:focus, textarea:focus {
+  border-color: #4b9cd3;
+  outline: none;
+  box-shadow: 0 0 4px #4b9cd3;
+}
+
+/* 提交按钮 */
+button {
+  background-color: #4b9cd3;
+  color: #fff;
+  border: none;
+  padding: 10px 22px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: 0.3s;
+}
+
+button:hover {
+  background-color: #357aa8;
+}
+
+/* 底部信息 */
 footer {
-  width: 100%;
-  text-align: center;
-  padding: 1rem;
-  background: #000;
-  border-top: 1px solid gold;
-  color: #888;
-  font-size: 0.9rem;
+  margin-top: 60px;
+  font-size: 13px;
+  color: #777;
+  padding-bottom: 20px;
 }
+
+/* 卡片样式（用于登录或信息展示） */
+.card {
+  background: white;
+  border-radius: 10px;
+  padding: 25px;
+  margin: 20px auto;
+  width: 85%;
+  max-width: 400px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* 小动画 */
+.fade-in {
+  animation: fadeIn 1s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform
