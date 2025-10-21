@@ -1,37 +1,58 @@
-<div id="user-info" style="margin-bottom: 20px; text-align: center;">
-  <p>你好，<span id="username">游客</span>！</p>
-  <p id="bio">欢迎来到 Emovibe 💫</p>
-</div>
-<main>
-  <h2>欢迎来到 Emovibe</h2>
-  <p>在这里，你可以倾诉、陪伴、疗愈、赚取温暖的能量。</p>
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emovibe | 让生活充满温暖 · Fill Life with Warmth</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
 
-  <p>当前登录用户：<span id="username"></span></p>
+<body>
+  <header>
+    <h1>💙 Emovibe | 让生活充满温暖 · Fill Life with Warmth</h1>
+  </header>
 
-  <div class="btn-group">
-    <a href="login.html" class="btn">登录 / Login</a>
-    <a href="join.html" class="btn">成为陪聊师 / Join</a>
-    <a href="chat.html" class="btn">进入聊天室 / Chat</a>
+  <!-- 🧍 用户信息区块 -->
+  <div id="user-info" style="margin-bottom: 20px; text-align: center;">
+    <p>你好，<span id="username">游客</span>！</p>
+    <p id="bio">欢迎来到 Emovibe 💫</p>
   </div>
-</main>
 
-<footer>
-  © 2025 Emovibe | 用心陪伴每一个情绪
-</footer>
+  <main>
+    <h2>欢迎来到 Emovibe</h2>
+    <p>在这里，你可以倾诉、陪伴、疗愈、赚取温暖的能量。</p>
 
-<script type="module">
-  import { supabase } from './assets/supabase.js'
+    <div class="btn-group">
+      <a href="login.html" class="btn">登录 / Login</a>
+      <a href="join.html" class="btn">成为陪聊师 / Join as Listener</a>
+      <a href="chat.html" class="btn">进入聊天室 / Chat Room</a>
+    </div>
+  </main>
 
-  async function loadUser() {
-    const { data: { user } } = await supabase.auth.getUser()
+  <footer>
+    © 2025 Emovibe | 用心陪伴每一个情绪
+  </footer>
 
-    if (!user) {
-      window.location.href = "login.html"
-      return
+  <!-- ✨ 引入 Supabase -->
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
+
+    // 载入用户信息
+    async function loadUser() {
+      const { data: { user } } = await supabase.auth.getUser()
+
+      if (!user) {
+        // 未登录时默认显示游客
+        document.getElementById('username').textContent = '游客'
+        return
+      }
+
+      // 登录后显示邮箱或昵称
+      document.getElementById('username').textContent =
+        user.user_metadata?.name || user.email || '用户'
     }
 
-    document.getElementById('username').textContent = user.email
-  }
-
-  loadUser()
-</script>
+    loadUser()
+  </script>
+</body>
+</html>
