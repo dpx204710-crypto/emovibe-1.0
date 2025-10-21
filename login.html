@@ -1,36 +1,29 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>登录 | Emovibe</title>
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
-  <header>
-    <h1>💙 欢迎登录 Emovibe</h1>
-  </header>
+  <header><h1>💙 欢迎登录 Emovibe</h1></header>
 
-  <main style="max-width:400px; margin:auto; padding:20px;">
+  <main style="max-width:420px;margin:30px auto;padding:20px;">
     <form id="login-form">
-      <label>邮箱：</label>
-      <input type="email" id="email" placeholder="请输入邮箱" required />
-
-      <label>密码：</label>
-      <input type="password" id="password" placeholder="请输入密码" required />
-
-      <button type="submit" class="btn">登录 / Login</button>
+      <label>邮箱</label>
+      <input id="email" type="email" placeholder="你@example.com" required />
+      <label>密码</label>
+      <input id="password" type="password" placeholder="密码" required />
+      <button class="btn" type="submit">登录 / Login</button>
     </form>
-
-    <p id="status" style="text-align:center; color:green; margin-top:15px;"></p>
-    <p style="text-align:center; margin-top:10px;">
-      还没有账号？<a href="join.html">去注册 / Join</a>
+    <p style="text-align:center;margin-top:12px;">
+      还没有账号？<a href="join.html">注册 / Join</a>
     </p>
+    <p id="status" style="text-align:center;color:#c00;margin-top:10px;"></p>
   </main>
 
-  <footer>
-    © 2025 Emovibe | 温暖每一份情绪
-  </footer>
+  <footer>© 2025 Emovibe</footer>
 
   <script type="module">
     import { supabase } from './assets/supabase.js'
@@ -40,26 +33,54 @@
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
-      statusEl.textContent = '正在登录中... ⏳'
+      statusEl.textContent = '正在登录...'
 
       const email = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value.trim()
 
-      // 调用 Supabase 登录
+      // 登录 Supabase
       const { data, error } = await supabase.auth.signInWithPassword({ email, password })
 
       if (error) {
-        statusEl.textContent = '❌ 登录失败，请检查邮箱或密码'
-      } else {
-        // 保存用户名（用邮箱前半部分作为默认昵称）
-        const username = email.split('@')[0]
-        localStorage.setItem('username', username)
-
-        statusEl.textContent = '✅ 登录成功！正在跳转...'
-        setTimeout(() => {
-          window.location.href = 'index.html'
-        }, 1000)
+        statusEl.textContent = '登录失败：' + (error.message || '请检查邮箱/密码')
+        return
       }
+
+      // 登录成功：优先尝试读取 profiles 表中的昵称（若存在）
+      try {
+        const userId = data.user.id
+        const { data: profile, error: pErr } = await supabase
+            .from('profiles')
+            .select('username')
+            .eq('user_id', userId)
+            .single()
+
+        let nickname = ''
+        if (!pErr && profile && profile.username) {
+          nickname = profile.username
+        } else {
+          // 如果没有 profile 的 username，那就用邮箱前缀作为默认昵称
+          nickname = email.split('@')[0]
+          // 可选：插入或 upsert 到 profiles，保证资料存在
+          await supabase.from('profiles').upsert({
+            user_id: userId,
+            username: nickname,
+            avatar_url: '',
+            bio: ''
+          }, { onConflict: 'user_id' })
+        }
+
+        // 存到 localStorage 供首页快速读取（同时 Supabase 才是“最终来源”）
+        localStorage.setItem('emovibe_nickname', nickname)
+      } catch (err) {
+        console.error('读取/写入 profile 失败', err)
+        // 仍保存邮箱前缀，保证体验不受影响
+        localStorage.setItem('emovibe_nickname', email.split('@')[0])
+      }
+
+      statusEl.style.color = 'green'
+      statusEl.textContent = '登录成功，即将跳转...'
+      setTimeout(() => window.location.href = 'index.html', 900)
     })
   </script>
 </body>
