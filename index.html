@@ -1,64 +1,112 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emovibe | 让生活充满温暖 · Fill Life with Warmth</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Emovibe | 让生活充满温暖</title>
   <link rel="stylesheet" href="./assets/style.css" />
 </head>
-
 <body>
-  <header>
-    <h1>💙 Emovibe | 让生活充满温暖 · Fill Life with Warmth</h1>
+  <header style="padding:16px 24px;background:#fff;">
+    <div style="display:flex;align-items:center;justify-content:space-between;max-width:1100px;margin:0 auto;">
+      <div style="font-weight:700;color:#0077cc">💙 Emovibe</div>
+      <div>
+        <a href="chat.html" class="btn" style="margin-right:8px">聊天</a>
+        <a href="profile.html" class="btn" style="margin-right:8px">我的资料</a>
+        <button id="logoutBtn" class="btn" style="background:#f25">退出</button>
+      </div>
+    </div>
   </header>
 
-  <!-- 🧍 用户信息区块 -->
-  <div id="user-info" style="margin-bottom: 20px; text-align: center;">
-    <p>你好，<span id="username">游客</span>！</p>
-    <p id="bio">欢迎来到 Emovibe 💫</p>
-  </div>
+  <!-- 用户信息区 -->
+  <section style="max-width:1100px;margin:24px auto;padding:16px;">
+    <div id="user-info" style="text-align:center;padding:18px;border-radius:10px;background:linear-gradient(180deg,#fff,#f7fbff);box-shadow:0 6px 18px rgba(0,0,0,0.04);">
+      <p style="font-size:18px">你好，<strong id="username">游客</strong>！</p>
+      <p id="bio" style="color:#666">欢迎来到 Emovibe · Fill Life with Warmth</p>
+    </div>
+  </section>
 
-  <main>
-    <h2>欢迎来到 Emovibe</h2>
-    <p>在这里，你可以倾诉、陪伴、疗愈、赚取温暖的能量。</p>
+  <main style="max-width:1100px;margin:0 auto;padding:10px;">
+    <h2 style="text-align:center">在这里，你可以倾诉、陪伴、疗愈、赚取温暖的能量</h2>
 
-    <div class="btn-group">
+    <div style="display:flex;gap:12px;justify-content:center;margin-top:18px">
       <a href="login.html" class="btn">登录 / Login</a>
-      <a href="join.html" class="btn">成为陪聊师 / Join as Listener</a>
-      <a href="chat.html" class="btn">进入聊天室 / Chat Room</a>
+      <a href="join.html" class="btn">成为陪聊师 / Join</a>
+      <a href="chat.html" class="btn">进入聊天室 / Chat</a>
+      <a href="profile.html" class="btn">我的资料 / Profile</a>
     </div>
   </main>
 
-  <footer>
-    © 2025 Emovibe | 用心陪伴每一个情绪
-  </footer>
+  <footer style="text-align:center;padding:30px 0;color:#999">© 2025 Emovibe</footer>
 
-  <!-- ✨ 引入 Supabase -->
   <script type="module">
     import { supabase } from './assets/supabase.js'
 
-    // 载入用户信息
-    async function loadUser() {
-      const { data: { user } } = await supabase.auth.getUser()
+    // 载入用户并显示昵称（优先 Supabase profiles -> 再 localStorage -> 再 游客）
+    async function loadUserAndShow() {
+      try {
+        const { data: { user }, error: uErr } = await supabase.auth.getUser()
+        if (uErr) {
+          console.warn('supabase getUser error', uErr)
+        }
 
-      if (!user) {
-        // 未登录时默认显示游客
+        if (user) {
+          // 尝试从 profiles 表获取更正式的昵称与简介
+          const { data: profile, error: pErr } = await supabase
+            .from('profiles')
+            .select('username, bio')
+            .eq('user_id', user.id)
+            .single()
+
+          if (!pErr && profile && profile.username) {
+            document.getElementById('username').textContent = profile.username
+            document.getElementById('bio').textContent = profile.bio || '欢迎回来'
+            // 同步保存 localStorage（可供前端回退使用）
+            localStorage.setItem('emovibe_nickname', profile.username)
+            return
+          }
+
+          // 如果没有 profiles 记录，尝试从 user metadata 或 email 取值
+          const fallbackName = user.user_metadata?.name || (user.email ? user.email.split('@')[0] : null)
+          if (fallbackName) {
+            document.getElementById('username').textContent = fallbackName
+            document.getElementById('bio').textContent = '欢迎回来'
+            localStorage.setItem('emovibe_nickname', fallbackName)
+            return
+          }
+        }
+
+        // 最后回退到 localStorage 中保存的昵称（如果存在）
+        const localNick = localStorage.getItem('emovibe_nickname')
+        if (localNick) {
+          document.getElementById('username').textContent = localNick
+          document.getElementById('bio').textContent = '欢迎回来'
+          return
+        }
+
+        // 都没有就显示游客
         document.getElementById('username').textContent = '游客'
-        return
+        document.getElementById('bio').textContent = '欢迎来到 Emovibe'
+      } catch (err) {
+        console.error('加载用户出错', err)
+        // 失败时回退到 localStorage 或游客
+        const localNick = localStorage.getItem('emovibe_nickname') || '游客'
+        document.getElementById('username').textContent = localNick
       }
-
-      // 登录后显示邮箱或昵称
-      document.getElementById('username').textContent =
-        user.user_metadata?.name || user.email || '用户'
     }
 
-    loadUser()
+    // 退出登录
+    document.getElementById('logoutBtn').addEventListener('click', async () => {
+      try {
+        await supabase.auth.signOut()
+      } catch (e) {
+        console.warn('signOut error', e)
+      }
+      localStorage.removeItem('emovibe_nickname')
+      window.location.href = 'login.html'
+    })
+
+    loadUserAndShow()
   </script>
 </body>
 </html>
-<div class="btn-group">
-  <a href="login.html" class="btn">登录 / Login</a>
-  <a href="join.html" class="btn">成为陪聊师 / Join</a>
-  <a href="chat.html" class="btn">进入聊天室 / Chat</a>
-  <a href="profile.html" class="btn">我的资料 / Profile</a>
-</div>
