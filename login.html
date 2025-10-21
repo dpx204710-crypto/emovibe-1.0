@@ -3,114 +3,64 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>登录 / 注册 - Emovibe</title>
-  <link rel="stylesheet" href="assets/style.css" />
-  <script type="module" src="assets/supabase.js"></script>
-  <style>
-    body {
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #dcefff, #ffffff);
-      text-align: center;
-      padding: 50px 20px;
-      color: #333;
-    }
-    .box {
-      background: #fff;
-      max-width: 380px;
-      margin: auto;
-      padding: 30px;
-      border-radius: 12px;
-      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-    }
-    input {
-      width: 90%;
-      padding: 12px;
-      margin: 8px 0;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-      font-size: 16px;
-    }
-    button {
-      width: 95%;
-      padding: 12px;
-      border: none;
-      border-radius: 8px;
-      background: #4b9cd3;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover { background: #357aa8; }
-    p { margin-top: 10px; font-size: 14px; }
-  </style>
+  <title>登录 | Emovibe</title>
+  <link rel="stylesheet" href="./assets/style.css" />
 </head>
 <body>
+  <header>
+    <h1>💙 欢迎登录 Emovibe</h1>
+  </header>
 
-  <div class="box">
-    <h2>💙 登录或注册 Emovibe</h2>
-    <input id="email" type="email" placeholder="电子邮箱" />
-    <input id="password" type="password" placeholder="密码" />
-    <button id="loginBtn">登录</button>
-    <button id="registerBtn" style="background:#7cb342;margin-top:10px;">注册</button>
-    <p id="message"></p>
-  </div>
+  <main style="max-width:400px; margin:auto; padding:20px;">
+    <form id="login-form">
+      <label>邮箱：</label>
+      <input type="email" id="email" placeholder="请输入邮箱" required />
+
+      <label>密码：</label>
+      <input type="password" id="password" placeholder="请输入密码" required />
+
+      <button type="submit" class="btn">登录 / Login</button>
+    </form>
+
+    <p id="status" style="text-align:center; color:green; margin-top:15px;"></p>
+    <p style="text-align:center; margin-top:10px;">
+      还没有账号？<a href="join.html">去注册 / Join</a>
+    </p>
+  </main>
+
+  <footer>
+    © 2025 Emovibe | 温暖每一份情绪
+  </footer>
 
   <script type="module">
     import { supabase } from './assets/supabase.js'
 
-    const email = document.getElementById('email')
-    const password = document.getElementById('password')
-    const message = document.getElementById('message')
+    const form = document.getElementById('login-form')
+    const statusEl = document.getElementById('status')
 
-    // 登录
-    document.getElementById('loginBtn').addEventListener('click', async () => {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.value,
-        password: password.value
-      })
-      if (error) {
-        message.textContent = "❌ 登录失败：" + error.message
-      } else {
-        message.textContent = "✅ 登录成功，欢迎回来！"
-        localStorage.setItem('user', JSON.stringify(data.user))
-        setTimeout(() => { window.location.href = "index.html" }, 1200)
-      }
-    })
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      statusEl.textContent = '正在登录中... ⏳'
 
-    // 注册
-    document.getElementById('registerBtn').addEventListener('click', async () => {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.value,
-        password: password.value
-      })
+      const email = document.getElementById('email').value.trim()
+      const password = document.getElementById('password').value.trim()
+
+      // 调用 Supabase 登录
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
+
       if (error) {
-        message.textContent = "❌ 注册失败：" + error.message
+        statusEl.textContent = '❌ 登录失败，请检查邮箱或密码'
       } else {
-        message.textContent = "✅ 注册成功！请登录"
+        // 保存用户名（用邮箱前半部分作为默认昵称）
+        const username = email.split('@')[0]
+        localStorage.setItem('username', username)
+
+        statusEl.textContent = '✅ 登录成功！正在跳转...'
+        setTimeout(() => {
+          window.location.href = 'index.html'
+        }, 1000)
       }
     })
   </script>
-
 </body>
 </html>
-<script type="module">
-import { supabase } from './assets/supabase.js'
-
-document.getElementById('loginForm').addEventListener('submit', async (e) => {
-  e.preventDefault()
-
-  const email = document.getElementById('email').value
-  const password = document.getElementById('password').value
-
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
-  if (error) {
-    alert('登录失败：' + error.message)
-    return
-  }
-
-  alert('登录成功！')
-  window.location.href = 'index.html'
-})
-</script>
