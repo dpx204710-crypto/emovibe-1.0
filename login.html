@@ -1,36 +1,96 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emovibe 登录</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 / 注册 - Emovibe</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script type="module" src="assets/supabase.js"></script>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #dcefff, #ffffff);
+      text-align: center;
+      padding: 50px 20px;
+      color: #333;
+    }
+    .box {
+      background: #fff;
+      max-width: 380px;
+      margin: auto;
+      padding: 30px;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+    input {
+      width: 90%;
+      padding: 12px;
+      margin: 8px 0;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+      font-size: 16px;
+    }
+    button {
+      width: 95%;
+      padding: 12px;
+      border: none;
+      border-radius: 8px;
+      background: #4b9cd3;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+    button:hover { background: #357aa8; }
+    p { margin-top: 10px; font-size: 14px; }
+  </style>
 </head>
 <body>
-  <div class="login-container">
-    <h1>Emovibe</h1>
-    <h2>让生活充满温暖 · Fill Life with Warmth</h2>
 
-    <form id="login-form" onsubmit="event.preventDefault(); handleLogin();">
-      <input type="text" id="username" placeholder="请输入昵称 / Enter your name" />
-      <button type="submit">进入聊天室 / Enter Chat</button>
-    </form>
-
-    <div class="footer">
-      © 2025 Emovibe | <a href="#">隐私政策 / Privacy Policy</a>
-    </div>
+  <div class="box">
+    <h2>💙 登录或注册 Emovibe</h2>
+    <input id="email" type="email" placeholder="电子邮箱" />
+    <input id="password" type="password" placeholder="密码" />
+    <button id="loginBtn">登录</button>
+    <button id="registerBtn" style="background:#7cb342;margin-top:10px;">注册</button>
+    <p id="message"></p>
   </div>
 
-  <script>
-  function handleLogin() {
-    const username = document.getElementById("username").value.trim();
-    if (!username) {
-      alert("请输入昵称");
-      return;
-    }
-    localStorage.setItem("emovibe_user", username);
-    window.location.href = "chat.html";
-  }
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
+
+    const email = document.getElementById('email')
+    const password = document.getElementById('password')
+    const message = document.getElementById('message')
+
+    // 登录
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email.value,
+        password: password.value
+      })
+      if (error) {
+        message.textContent = "❌ 登录失败：" + error.message
+      } else {
+        message.textContent = "✅ 登录成功，欢迎回来！"
+        localStorage.setItem('user', JSON.stringify(data.user))
+        setTimeout(() => { window.location.href = "index.html" }, 1200)
+      }
+    })
+
+    // 注册
+    document.getElementById('registerBtn').addEventListener('click', async () => {
+      const { data, error } = await supabase.auth.signUp({
+        email: email.value,
+        password: password.value
+      })
+      if (error) {
+        message.textContent = "❌ 注册失败：" + error.message
+      } else {
+        message.textContent = "✅ 注册成功！请登录"
+      }
+    })
   </script>
+
 </body>
 </html>
