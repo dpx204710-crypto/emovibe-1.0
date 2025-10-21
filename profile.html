@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>我的资料 | Emovibe</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+</head>
+
+<body>
+  <header>
+    <h1>💙 我的资料 · My Profile</h1>
+  </header>
+
+  <main style="max-width: 400px; margin: auto; padding: 20px;">
+    <p>欢迎回来，<span id="username">加载中...</span></p>
+
+    <form id="profile-form">
+      <label for="nickname">昵称：</label>
+      <input type="text" id="nickname" placeholder="输入你的昵称" />
+
+      <label for="bio">简介：</label>
+      <textarea id="bio" placeholder="写点关于自己的话..."></textarea>
+
+      <button type="submit" class="btn">保存资料 / Save</button>
+    </form>
+
+    <p id="status" style="text-align:center; color:green; margin-top:15px;"></p>
+    <div style="text-align:center; margin-top:20px;">
+      <a href="index.html" class="btn">返回首页 / Home</a>
+      <a href="chat.html" class="btn">进入聊天室 / Chat Room</a>
+    </div>
+  </main>
+
+  <footer>
+    © 2025 Emovibe | 用心陪伴每一个情绪
+  </footer>
+
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
+
+    // 加载当前用户
+    async function loadProfile() {
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        window.location.href = "login.html"
+        return
+      }
+
+      document.getElementById('username').textContent = user.email
+
+      // 从 profiles 表读取资料
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', user.id)
+        .single()
+
+      if (data) {
+        document.getElementById('nickname').value = data.nickname || ''
+        document.getElementById('bio').value = data.bio || ''
+      }
+    }
+
+    // 提交更新
+    document.getElementById('profile-form').addEventListener('submit', async (e) => {
+      e.preventDefault()
+
+      const nickname = document.getElementById('nickname').value.trim()
+      const bio = document.getElementById('bio').value.trim()
+
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) return alert("请先登录")
+
+      const { error } = await supabase.from('profiles').upsert({
+        id: user.id,
+        email: user.email,
+        nickname,
+        bio,
+        updated_at: new Date()
+      })
+
+      document.getElementById('status').textContent = error ? '保存失败，请重试' : '✅ 已成功保存'
+    })
+
+    loadProfile()
+  </script>
+</body>
+</html>
