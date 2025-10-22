@@ -1,50 +1,45 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>加入我们 / Join Us - Emovibe</title>
-  <link rel="stylesheet" href="assets/style.css">
-  <script defer src="assets/lang.js"></script>
+  <title>加入我们 | Emovibe</title>
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
   <header>
     <h1>Emovibe</h1>
     <nav>
-      <a href="index.html" data-lang="home">首页 / Home</a>
-      <a href="login.html" data-lang="login">登录 / Login</a>
-      <a href="join.html" data-lang="join">加入我们 / Join</a>
+      <a href="index.html">首页 / Home</a>
+      <a href="login.html">登录 / Login</a>
+      <a href="join.html" class="active">加入我们 / Join</a>
     </nav>
-    <select id="language-switch">
-      <option value="zh">中文</option>
-      <option value="en">English</option>
-    </select>
   </header>
 
   <main>
-    <h2 data-lang="join">加入我们</h2>
-    <p data-lang="desc-join">
-      成为 Emovibe 的一员，无论你想倾诉，还是愿意倾听。  
-      每一次交流，都是一次心灵的相遇。
-    </p>
+    <h2>加入我们</h2>
+    <p>成为 Emovibe 的一员，无论你想倾诉，还是愿意倾听。每一次交流，都是一次心灵的相遇。</p>
 
-    <form class="form-box" onsubmit="return false;">
-      <label for="nickname" data-lang="nickname">昵称 / Nickname</label>
-      <input type="text" id="nickname" placeholder="输入昵称 / Enter your nickname" required>
+    <form id="join-form">
+      <label>昵称 / Nickname</label>
+      <input type="text" id="nickname" required>
 
-      <label for="email" data-lang="email">邮箱 / Email</label>
-      <input type="email" id="email" placeholder="输入邮箱 / Enter your email" required>
+      <label>账号 / Username</label>
+      <input type="text" id="username" required>
 
-      <label for="role" data-lang="role">角色 / Role</label>
+      <label>密码 / Password</label>
+      <input type="password" id="password" required>
+
+      <label>角色 / Role</label>
       <select id="role">
         <option value="user">普通用户 / User</option>
         <option value="listener">陪聊师 / Listener</option>
       </select>
 
-      <button class="button" type="submit" onclick="join()">提交申请 / Submit</button>
+      <button type="submit">提交申请 / Submit</button>
     </form>
 
-    <p><a href="login.html" data-lang="login">已有账号？登录 / Login</a></p>
+    <p>已有账号？<a href="login.html">登录 / Login</a></p>
   </main>
 
   <footer>
@@ -52,61 +47,26 @@
   </footer>
 
   <script>
-    function join() {
-      const name = document.getElementById('nickname').value.trim();
-      const email = document.getElementById('email').value.trim();
-      const role = document.getElementById('role').value;
+    document.getElementById("join-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const nickname = document.getElementById("nickname").value;
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
+      const role = document.getElementById("role").value;
 
-      if (!name || !email) {
-        alert('请填写完整信息 / Please fill all fields.');
+      // 存储用户信息到本地 localStorage
+      const users = JSON.parse(localStorage.getItem("users")) || {};
+      if (users[username]) {
+        alert("❌ 该用户名已存在，请换一个！");
         return;
       }
 
-      alert(`申请成功（演示版）/ Application sent successfully (Demo)\n角色 / Role: ${role}`);
-      window.location.href = 'login.html';
-    }
+      users[username] = { nickname, password, role };
+      localStorage.setItem("users", JSON.stringify(users));
+
+      alert("✅ 注册成功！请登录。");
+      window.location.href = "login.html";
+    });
   </script>
 </body>
 </html>
-<script type="module">
-import { supabase } from './assets/supabase.js'
-
-// 注册新用户
-document.getElementById('joinForm').addEventListener('submit', async (e) => {
-  e.preventDefault()
-
-  const email = document.getElementById('email').value
-  const password = document.getElementById('password').value
-  const username = document.getElementById('username').value
-
-  // 创建账号
-  const { data, error } = await supabase.auth.signUp({
-    email,
-    password,
-    options: {
-      data: { username } // 保存用户名
-    }
-  })
-
-  if (error) {
-    alert('注册失败：' + error.message)
-    return
-  }
-
-  // 在 profiles 表中创建用户资料
-  const user = data.user
-  if (user) {
-    await supabase.from('profiles').insert([
-      {
-        user_id: user.id,
-        username: username,
-        avatar_url: '',
-        bio: '这个人很神秘，还没有写简介～'
-      }
-    ])
-  }
-
-  alert('注册成功！请返回登录页面登录')
-  window.location.href = 'login.html'
-})
-</script>
