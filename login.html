@@ -1,87 +1,63 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>登录 | Emovibe</title>
-  <link rel="stylesheet" href="./assets/style.css" />
+  <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <header><h1>💙 欢迎登录 Emovibe</h1></header>
+  <header>
+    <h1>Emovibe</h1>
+    <nav>
+      <a href="index.html">首页 / Home</a>
+      <a href="login.html" class="active">登录 / Login</a>
+      <a href="join.html">加入我们 / Join</a>
+    </nav>
+  </header>
 
-  <main style="max-width:420px;margin:30px auto;padding:20px;">
+  <main>
+    <h2>登录 / Login</h2>
     <form id="login-form">
-      <label>邮箱</label>
-      <input id="email" type="email" placeholder="你@example.com" required />
-      <label>密码</label>
-      <input id="password" type="password" placeholder="密码" required />
-      <button class="btn" type="submit">登录 / Login</button>
+      <label>账号 / Username</label>
+      <input type="text" id="username" required>
+
+      <label>密码 / Password</label>
+      <input type="password" id="password" required>
+
+      <button type="submit">登录 / Login</button>
     </form>
-    <p style="text-align:center;margin-top:12px;">
-      还没有账号？<a href="join.html">注册 / Join</a>
-    </p>
-    <p id="status" style="text-align:center;color:#c00;margin-top:10px;"></p>
+    <p>还没有账号？<a href="join.html">注册 / Join</a></p>
   </main>
 
-  <footer>© 2025 Emovibe</footer>
+  <footer>
+    <p>© 2025 Emovibe | Hope & Warmth for Everyone</p>
+  </footer>
 
-  <script type="module">
-    import { supabase } from './assets/supabase.js'
+  <script>
+    document.getElementById("login-form").addEventListener("submit", function(e) {
+      e.preventDefault();
+      const username = document.getElementById("username").value;
+      const password = document.getElementById("password").value;
 
-    const form = document.getElementById('login-form')
-    const statusEl = document.getElementById('status')
+      const users = JSON.parse(localStorage.getItem("users")) || {};
+      const user = users[username];
 
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault()
-      statusEl.textContent = '正在登录...'
-
-      const email = document.getElementById('email').value.trim()
-      const password = document.getElementById('password').value.trim()
-
-      // 登录 Supabase
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password })
-
-      if (error) {
-        statusEl.textContent = '登录失败：' + (error.message || '请检查邮箱/密码')
-        return
+      if (!user) {
+        alert("❌ 用户不存在，请先注册。");
+        return;
       }
 
-      // 登录成功：优先尝试读取 profiles 表中的昵称（若存在）
-      try {
-        const userId = data.user.id
-        const { data: profile, error: pErr } = await supabase
-            .from('profiles')
-            .select('username')
-            .eq('user_id', userId)
-            .single()
-
-        let nickname = ''
-        if (!pErr && profile && profile.username) {
-          nickname = profile.username
-        } else {
-          // 如果没有 profile 的 username，那就用邮箱前缀作为默认昵称
-          nickname = email.split('@')[0]
-          // 可选：插入或 upsert 到 profiles，保证资料存在
-          await supabase.from('profiles').upsert({
-            user_id: userId,
-            username: nickname,
-            avatar_url: '',
-            bio: ''
-          }, { onConflict: 'user_id' })
-        }
-
-        // 存到 localStorage 供首页快速读取（同时 Supabase 才是“最终来源”）
-        localStorage.setItem('emovibe_nickname', nickname)
-      } catch (err) {
-        console.error('读取/写入 profile 失败', err)
-        // 仍保存邮箱前缀，保证体验不受影响
-        localStorage.setItem('emovibe_nickname', email.split('@')[0])
+      if (user.password !== password) {
+        alert("❌ 密码错误，请重试。");
+        return;
       }
 
-      statusEl.style.color = 'green'
-      statusEl.textContent = '登录成功，即将跳转...'
-      setTimeout(() => window.location.href = 'index.html', 900)
-    })
+      // 登录成功后保存当前用户
+      localStorage.setItem("currentUser", JSON.stringify(user));
+      alert(`✅ 欢迎回来，${user.nickname}！`);
+      window.location.href = "index.html";
+    });
   </script>
 </body>
 </html>
