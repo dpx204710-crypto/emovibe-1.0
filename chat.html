@@ -3,277 +3,146 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>💬 Emovibe 聊天室</title>
+  <title>Emovibe 聊天室 💬</title>
   <style>
     body {
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
-      background: linear-gradient(135deg, #b3d9ff, #e6f2ff);
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: #eaf3ff;
+      color: #333;
       margin: 0;
       padding: 0;
       display: flex;
       flex-direction: column;
-      align-items: center;
-      min-height: 100vh;
+      height: 100vh;
     }
-
     header {
+      background-color: #3b82f6;
+      color: white;
       text-align: center;
-      color: #007bff;
-      margin-top: 20px;
+      padding: 15px;
+      font-size: 20px;
+      font-weight: bold;
     }
-
-    main {
-      background: #fff;
-      width: 90%;
-      max-width: 500px;
-      padding: 20px;
-      border-radius: 15px;
-      box-shadow: 0 4px 14px rgba(0, 0, 0, 0.1);
-      margin-top: 20px;
-    }
-
     #chat-box {
-      height: 420px;
-      overflow-y: auto;
-      padding: 10px;
-      background: #f8faff;
-      border: 1px solid #dce6f7;
-      border-radius: 10px;
-      display: flex;
-      flex-direction: column;
-    }
-
-    .message {
-      display: flex;
-      flex-direction: column;
-      margin: 8px 0;
-      word-wrap: break-word;
-    }
-
-    .mine {
-      align-items: flex-end;
-    }
-
-    .other {
-      align-items: flex-start;
-    }
-
-    .bubble {
-      max-width: 75%;
-      padding: 10px 14px;
-      border-radius: 16px;
-      font-size: 15px;
-      line-height: 1.5em;
-      word-break: break-word;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-
-    .mine .bubble {
-      background: #007bff;
-      color: #fff;
-      border-bottom-right-radius: 4px;
-    }
-
-    .other .bubble {
-      background: #e1ecff;
-      color: #333;
-      border-bottom-left-radius: 4px;
-    }
-
-    .nickname {
-      font-size: 12px;
-      color: #666;
-      margin-bottom: 4px;
-    }
-
-    .time {
-      font-size: 11px;
-      color: #999;
-      margin-top: 3px;
-    }
-
-    .input-area {
-      display: flex;
-      align-items: center;
-      margin-top: 10px;
-      gap: 8px;
-    }
-
-    #messageInput {
       flex: 1;
-      padding: 8px;
-      border-radius: 5px;
-      border: 1px solid #ccc;
-      font-size: 15px;
+      overflow-y: auto;
+      padding: 15px;
+      background-color: #f8fafc;
+      display: flex;
+      flex-direction: column;
     }
-
-    #sendBtn {
-      padding: 8px 16px;
-      background: #007bff;
-      color: #fff;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
+    .message {
+      background: white;
+      border-radius: 10px;
+      padding: 10px 15px;
+      margin-bottom: 10px;
+      max-width: 70%;
+      word-wrap: break-word;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.1);
     }
-
-    #sendBtn:hover {
-      background: #0056b3;
+    .me {
+      align-self: flex-end;
+      background-color: #dbeafe;
     }
-
-    footer {
+    .system {
       text-align: center;
-      font-size: 13px;
-      color: #666;
-      margin-top: 15px;
+      font-size: 12px;
+      color: #777;
+      margin: 5px 0;
     }
-
-    #nicknameBox {
-      text-align: center;
-      margin-bottom: 15px;
+    #chat-input {
+      display: flex;
+      padding: 10px;
+      border-top: 1px solid #ddd;
+      background-color: white;
     }
-
-    #nicknameInput {
-      padding: 6px;
-      font-size: 15px;
+    #chat-input input {
+      flex: 1;
+      padding: 10px;
       border: 1px solid #ccc;
       border-radius: 5px;
-      width: 70%;
+      outline: none;
     }
-
-    #saveNameBtn {
-      padding: 6px 10px;
-      background: #007bff;
+    #chat-input button {
+      margin-left: 10px;
+      padding: 10px 20px;
+      background-color: #3b82f6;
       color: white;
       border: none;
       border-radius: 5px;
       cursor: pointer;
     }
-
-    #emojiBox {
-      margin-top: 5px;
-      text-align: center;
-    }
-
-    #emojiBox span {
-      cursor: pointer;
-      font-size: 20px;
-      margin: 0 5px;
-      transition: transform 0.1s;
-    }
-
-    #emojiBox span:hover {
-      transform: scale(1.2);
-    }
   </style>
-</head>
-
-<body>
-  <header>
-    <h1>💎 Emovibe 聊天室</h1>
-    <p>分享情绪 · 倾听彼此 · 让心更暖</p>
-  </header>
-
-  <main>
-    <div id="nicknameBox">
-      <input type="text" id="nicknameInput" placeholder="输入你的昵称..." />
-      <button id="saveNameBtn">确定</button>
-    </div>
-
-    <div id="chat-box"></div>
-
-    <div id="emojiBox">
-      😊 😢 😡 ❤️ 👍 🌈 🌙 ☀️ 🫶 🙌 💫 💖 🎵
-    </div>
-
-    <div class="input-area">
-      <input type="text" id="messageInput" placeholder="说点什么..." />
-      <button id="sendBtn">发送</button>
-    </div>
-  </main>
-
-  <footer>© 2025 Emovibe | Hope & Warmth for Everyone 🌏</footer>
-
   <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head>
+<body>
+  <header>💙 Emovibe 聊天室</header>
+
+  <div id="chat-box">
+    <div class="system">正在连接到 Emovibe 聊天系统...</div>
+  </div>
+
+  <div id="chat-input">
+    <input type="text" id="message" placeholder="说点什么吧..." />
+    <button onclick="sendMessage()">发送</button>
+  </div>
+
   <script>
-    const SUPABASE_URL = 'https://lryfufidcxnxdzglbzgq.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU';
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // ✅ Supabase 配置
+    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...."; // 你的 Key
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-    const chatBox = document.getElementById('chat-box');
-    const sendBtn = document.getElementById('sendBtn');
-    const input = document.getElementById('messageInput');
-    const nicknameInput = document.getElementById('nicknameInput');
-    const saveNameBtn = document.getElementById('saveNameBtn');
-    const nicknameBox = document.getElementById('nicknameBox');
-    const emojiBox = document.getElementById('emojiBox');
+    const chatBox = document.getElementById("chat-box");
+    const messageInput = document.getElementById("message");
 
-    let nickname = localStorage.getItem('nickname');
+    let currentUser = localStorage.getItem("username") || "游客";
 
-    if (nickname) {
-      nicknameBox.style.display = 'none';
+    // ✅ 加载历史消息
+    async function loadMessages() {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: true });
+
+      if (error) {
+        console.error("加载失败：", error);
+        return;
+      }
+
+      chatBox.innerHTML = "";
+      data.forEach(msg => displayMessage(msg));
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    saveNameBtn.addEventListener('click', () => {
-      const name = nicknameInput.value.trim();
-      if (!name) return alert("请输入昵称");
-      localStorage.setItem('nickname', name);
-      nickname = name;
-      nicknameBox.style.display = 'none';
-    });
+    // ✅ 显示消息
+    function displayMessage(msg) {
+      const div = document.createElement("div");
+      div.classList.add("message");
+      if (msg.user_email === currentUser) div.classList.add("me");
+      div.textContent = `${msg.user_email}: ${msg.content}`;
+      chatBox.appendChild(div);
+    }
 
-    sendBtn.addEventListener('click', async () => {
-      if (!nickname) return alert("请先输入昵称");
-      const text = input.value.trim();
+    // ✅ 发送消息
+    async function sendMessage() {
+      const text = messageInput.value.trim();
       if (!text) return;
 
       const { error } = await supabase
-        .from('messages')
-        .insert([{ user_email: nickname, content: text }]);
+        .from("messages")
+        .insert([{ user_email: currentUser, content: text }]);
 
-      if (error) alert('发送失败: ' + error.message);
-      else input.value = '';
-    });
-
-    emojiBox.addEventListener('click', (e) => {
-      if (e.target.tagName === 'SPAN') {
-        input.value += e.target.textContent;
-        input.focus();
-      }
-    });
-
-    async function loadMessages() {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true });
-      if (error) return console.error(error);
-      chatBox.innerHTML = '';
-      data.forEach(addMessage);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      if (error) console.error("发送失败：", error);
+      else messageInput.value = "";
     }
 
-    function addMessage(msg) {
-      const div = document.createElement('div');
-      const mine = msg.user_email === nickname;
-      div.className = 'message ' + (mine ? 'mine' : 'other');
-
-      const time = new Date(msg.created_at).toLocaleTimeString('zh-CN', {
-        hour: '2-digit', minute: '2-digit'
-      });
-
-      div.innerHTML = `
-        <div class="nickname">${msg.user_email}</div>
-        <div class="bubble">${msg.content}</div>
-        <div class="time">${time}</div>
-      `;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
+    // ✅ 实时监听消息更新
     supabase
-      .channel('realtime:messages')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-        addMessage(payload.new);
+      .channel("realtime:messages")
+      .on("postgres_changes", { event: "INSERT", schema: "public", table: "messages" }, payload => {
+        displayMessage(payload.new);
+        chatBox.scrollTop = chatBox.scrollHeight;
       })
       .subscribe();
 
