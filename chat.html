@@ -33,26 +33,45 @@
     }
 
     #chat-box {
-      height: 400px;
+      height: 420px;
       overflow-y: auto;
       background: #f9f9f9;
       padding: 10px;
       border-radius: 8px;
       border: 1px solid #ddd;
       margin-bottom: 10px;
+      display: flex;
+      flex-direction: column;
     }
 
     .message {
-      background: #e1ecff;
-      padding: 8px 10px;
-      border-radius: 6px;
-      margin: 6px 0;
+      max-width: 75%;
+      margin: 8px 0;
+      padding: 10px 14px;
+      border-radius: 12px;
+      line-height: 1.5em;
+      word-wrap: break-word;
       font-size: 15px;
-      line-height: 1.4em;
     }
 
-    .message strong {
-      color: #007bff;
+    .mine {
+      align-self: flex-end;
+      background: #007bff;
+      color: white;
+      border-bottom-right-radius: 0;
+    }
+
+    .other {
+      align-self: flex-start;
+      background: #e1ecff;
+      color: #333;
+      border-bottom-left-radius: 0;
+    }
+
+    .nickname {
+      font-size: 12px;
+      color: #666;
+      margin: 0 4px;
     }
 
     .input-area {
@@ -76,101 +95,3 @@
       border-radius: 5px;
       cursor: pointer;
     }
-
-    #sendBtn:hover {
-      background: #0056b3;
-    }
-
-    footer {
-      margin-top: 20px;
-      color: #666;
-      font-size: 13px;
-      text-align: center;
-    }
-  </style>
-</head>
-
-<body>
-  <header>
-    <h1>💬 Emovibe 聊天室</h1>
-    <p>在这里倾诉、聆听、获得温暖。</p>
-  </header>
-
-  <main>
-    <div id="chat-box"></div>
-
-    <div class="input-area">
-      <input type="text" id="messageInput" placeholder="说点什么..." />
-      <button id="sendBtn">发送</button>
-    </div>
-  </main>
-
-  <footer>© 2025 Emovibe | Hope & Warmth for Everyone</footer>
-
-  <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-  <script>
-    // 🚀 替换成你的 Supabase 信息
-    const SUPABASE_URL = 'https://lryfufidcxnxdzglbzgq.supabase.co';
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU';
-
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-    const chatBox = document.getElementById('chat-box');
-    const sendBtn = document.getElementById('sendBtn');
-    const input = document.getElementById('messageInput');
-
-    // 当前登录用户（或游客）
-    const nickname = localStorage.getItem('nickname') || '游客';
-
-    // 📨 发送消息
-    sendBtn.addEventListener('click', async () => {
-      const text = input.value.trim();
-      if (!text) return;
-
-      const { error } = await supabase
-        .from('messages')
-        .insert([{ user_email: nickname, content: text }]);
-
-      if (error) {
-        alert('发送失败: ' + error.message);
-      } else {
-        input.value = '';
-      }
-    });
-
-    // 📥 加载历史消息
-    async function loadMessages() {
-      const { data, error } = await supabase
-        .from('messages')
-        .select('*')
-        .order('created_at', { ascending: true });
-
-      if (error) return console.error(error);
-
-      chatBox.innerHTML = '';
-      data.forEach(addMessage);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // 💬 添加消息到页面
-    function addMessage(msg) {
-      const div = document.createElement('div');
-      div.className = 'message';
-      div.innerHTML = `<strong>${msg.user_email}</strong>: ${msg.content}`;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
-    }
-
-    // 🔄 实时监听新消息
-    supabase
-      .channel('realtime:messages')
-      .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, (payload) => {
-        addMessage(payload.new);
-      })
-      .subscribe();
-
-    // 初始化加载
-    loadMessages();
-  </script>
-</body>
-</html>
