@@ -1,66 +1,94 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>加入 Emovibe | 成为陪聊师或用户</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>注册 | Emovibe</title>
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
-  <h1>加入 Emovibe</h1>
+  <header class="site-header">
+    <div class="container header-inner"><div class="brand">💙 Emovibe</div></div>
+  </header>
 
-  <form id="join-form">
-    <label>邮箱 / Email</label>
-    <input type="email" id="email" required />
+  <main class="container">
+    <section class="card">
+      <h2>创建账号</h2>
+      <p class="muted">使用邮箱 + 密码注册，注册后请检查邮件完成验证（Supabase 邮件）。</p>
 
-    <label>密码 / Password</label>
-    <input type="password" id="password" required />
+      <form id="signupForm">
+        <label>邮箱（Email）</label>
+        <input id="email" type="email" required />
 
-    <label>昵称 / Nickname</label>
-    <input type="text" id="nickname" required />
+        <label>密码（Password）</label>
+        <input id="password" type="password" minlength="6" required />
 
-    <label>角色 / Role</label>
-    <select id="role">
-      <option value="user">普通用户 / User</option>
-      <option value="listener">陪聊师 / Listener</option>
-    </select>
+        <label>昵称（Nickname）</label>
+        <input id="nickname" type="text" maxlength="50" required />
 
-    <button type="submit">注册 / Sign Up</button>
-  </form>
+        <label>角色（Role）</label>
+        <select id="role">
+          <option value="user">普通用户 / User</option>
+          <option value="listener">陪聊师 / Listener</option>
+        </select>
 
-  <p>已有账号？<a href="login.html">去登录</a></p>
+        <div style="margin-top:12px">
+          <button class="btn" type="submit">注册 / Sign Up</button>
+          <a class="btn btn-light" href="login.html" style="margin-left:8px">去登录</a>
+        </div>
+      </form>
+
+      <p id="status" class="muted" style="margin-top:12px"></p>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container">© 2025 Emovibe</div></footer>
 
   <script type="module">
     import { supabase } from './assets/supabase.js'
 
-    const form = document.getElementById('join-form')
+    const form = document.getElementById('signupForm')
+    const status = document.getElementById('status')
 
     form.addEventListener('submit', async (e) => {
       e.preventDefault()
+      status.textContent = '正在注册...'
 
-      const email = document.getElementById('email').value
+      const email = document.getElementById('email').value.trim()
       const password = document.getElementById('password').value
-      const nickname = document.getElementById('nickname').value
+      const nickname = document.getElementById('nickname').value.trim()
       const role = document.getElementById('role').value
 
-      const { data, error } = await supabase.auth.signUp({ email, password })
+      // 使用 Supabase Auth 注册
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: { data: { name: nickname } } // 存入 user metadata
+      })
 
       if (error) {
-        alert('注册失败：' + error.message)
+        status.textContent = '注册失败：' + error.message
         return
       }
 
-      const { error: insertError } = await supabase
-        .from('profiles')
-        .insert([{ username: nickname, email, role }])
+      // 在 profiles 表中创建记录（如果尚未存在）
+      const up = await supabase.from('profiles').upsert({
+        user_id: data.user.id,
+        username: nickname,
+        avatar_url: '',
+        bio: '',
+        created_at: new Date()
+      }, { onConflict: 'user_id' })
 
-      if (insertError) {
-        alert('保存资料失败：' + insertError.message)
-        return
+      if (up.error) {
+        console.warn('profiles upsert error', up.error)
       }
 
-      alert('注册成功！请查收验证邮件！')
-      window.location.href = 'login.html'
+      // 保存一个本地回退昵称（用于快速显示）
+      localStorage.setItem('emovibe_nickname', nickname)
+
+      status.textContent = '注册成功，请到邮箱激活或直接登录（若允许）'
+      setTimeout(() => { window.location.href = 'login.html' }, 1200)
     })
   </script>
 </body>
