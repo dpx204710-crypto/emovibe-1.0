@@ -3,100 +3,133 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emovibe Chat</title>
+  <title>Emovibe Chat 智能聊天</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
-      background-color: #f6f9fc;
-      font-family: "PingFang SC", "Microsoft YaHei", sans-serif;
+      font-family: "Helvetica Neue", Arial, sans-serif;
+      background-color: #f4f7fb;
       margin: 0;
-      padding: 0;
       display: flex;
       flex-direction: column;
       height: 100vh;
     }
-    .chat-container {
+    header {
+      background-color: #4a90e2;
+      color: white;
+      text-align: center;
+      padding: 12px 0;
+      font-size: 20px;
+      font-weight: bold;
+    }
+    #chat-box {
       flex: 1;
-      padding: 20px;
       overflow-y: auto;
+      padding: 15px;
       display: flex;
       flex-direction: column;
     }
-    .message {
-      padding: 10px 15px;
-      margin: 8px 0;
-      border-radius: 12px;
+    .msg {
       max-width: 75%;
-      word-wrap: break-word;
+      padding: 10px 14px;
+      margin: 6px 0;
+      border-radius: 10px;
       line-height: 1.5;
+      word-wrap: break-word;
     }
     .user {
+      background-color: #dcf8c6;
       align-self: flex-end;
-      background: #007aff;
-      color: white;
     }
-    .ai {
+    .bot {
+      background-color: #fff;
+      border: 1px solid #ddd;
       align-self: flex-start;
-      background: #e9ecef;
     }
-    .input-area {
+    #input-area {
       display: flex;
       padding: 10px;
-      background: white;
-      border-top: 1px solid #ccc;
+      background: #fff;
+      border-top: 1px solid #ddd;
     }
-    input {
+    #msg-input {
       flex: 1;
-      border: none;
-      outline: none;
       padding: 10px;
-      font-size: 16px;
+      border: 1px solid #ccc;
+      border-radius: 6px;
+      outline: none;
+      font-size: 15px;
     }
     button {
-      background: #007aff;
-      border: none;
+      margin-left: 8px;
+      background-color: #4a90e2;
       color: white;
+      border: none;
+      border-radius: 6px;
       padding: 10px 15px;
-      border-radius: 8px;
       cursor: pointer;
-      font-size: 16px;
+      font-size: 15px;
     }
-    .error {
-      color: red;
-      text-align: center;
-      margin-top: 30px;
-      font-size: 16px;
+    button:hover {
+      background-color: #357abd;
     }
   </style>
 </head>
 <body>
-  <div class="chat-container" id="chat-container"></div>
-  <div class="input-area">
-    <input type="text" id="user-input" placeholder="输入消息..." />
+  <header>🤖 Emovibe 智能聊天</header>
+  <div id="chat-box"></div>
+
+  <div id="input-area">
+    <input id="msg-input" type="text" placeholder="输入你的消息..." />
     <button onclick="sendMessage()">发送</button>
   </div>
 
-  <script type="module">
-    import { createClient } from "https://esm.sh/@supabase/supabase-js";
+  <script>
+    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
 
-    // 环境变量（通过 Vercel 自动注入）
-    const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL;
-    const SUPABASE_KEY = import.meta.env.VITE_SUPABASE_KEY;
-    const OPENAI_API_KEY = import.meta.env.VITE_OPENAI_API_KEY;
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("msg-input");
 
-    const chatContainer = document.getElementById("chat-container");
-
-    // 检查是否缺少环境变量
-    if (!SUPABASE_URL || !SUPABASE_KEY || !OPENAI_API_KEY) {
-      chatContainer.innerHTML = `
-        <div class="error">
-          ⚠️ 缺少必要的环境变量：<br><br>
-          请前往 <b>Vercel → Settings → Environment Variables</b><br>
-          并填写以下变量：<br>
-          <code>VITE_SUPABASE_URL</code><br>
-          <code>VITE_SUPABASE_KEY</code><br>
-          <code>VITE_OPENAI_API_KEY</code>
-        </div>`;
-      throw new Error("Missing environment variables.");
+    async function loadMessages() {
+      const { data } = await supabase.from("messages").select("*").order("created_at", { ascending: true });
+      chatBox.innerHTML = "";
+      data.forEach(m => addMessage(m.content, m.role));
+      chatBox.scrollTop = chatBox.scrollHeight;
     }
 
-    const supabase = createClient(SUPABASE
+    async function sendMessage() {
+      const text = input.value.trim();
+      if (!text) return;
+      input.value = "";
+
+      addMessage(text, "user");
+      await supabase.from("messages").insert([{ content: text, role: "user" }]);
+
+      // 调用 API 获取回复
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
+
+      const data = await response.json();
+      const reply = data.reply || "（AI 无法回复）";
+
+      addMessage(reply, "bot");
+      await supabase.from("messages").insert([{ content: reply, role: "bot" }]);
+    }
+
+    function addMessage(content, role) {
+      const div = document.createElement("div");
+      div.className = "msg " + (role === "user" ? "user" : "bot");
+      div.textContent = content;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    loadMessages();
+  </script>
+</body>
+</html>
