@@ -2,71 +2,66 @@
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>加入我们 | Emovibe</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>加入 Emovibe | 成为陪聊师或用户</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <header>
-    <h1>Emovibe</h1>
-    <nav>
-      <a href="index.html">首页 / Home</a>
-      <a href="login.html">登录 / Login</a>
-      <a href="join.html" class="active">加入我们 / Join</a>
-    </nav>
-  </header>
+  <h1>加入 Emovibe</h1>
 
-  <main>
-    <h2>加入我们</h2>
-    <p>成为 Emovibe 的一员，无论你想倾诉，还是愿意倾听。每一次交流，都是一次心灵的相遇。</p>
+  <form id="join-form">
+    <label>邮箱 / Email</label>
+    <input type="email" id="email" required />
 
-    <form id="join-form">
-      <label>昵称 / Nickname</label>
-      <input type="text" id="nickname" required>
+    <label>密码 / Password</label>
+    <input type="password" id="password" required />
 
-      <label>账号 / Username</label>
-      <input type="text" id="username" required>
+    <label>昵称 / Nickname</label>
+    <input type="text" id="nickname" required />
 
-      <label>密码 / Password</label>
-      <input type="password" id="password" required>
+    <label>角色 / Role</label>
+    <select id="role">
+      <option value="user">普通用户 / User</option>
+      <option value="listener">陪聊师 / Listener</option>
+    </select>
 
-      <label>角色 / Role</label>
-      <select id="role">
-        <option value="user">普通用户 / User</option>
-        <option value="listener">陪聊师 / Listener</option>
-      </select>
+    <button type="submit">注册 / Sign Up</button>
+  </form>
 
-      <button type="submit">提交申请 / Submit</button>
-    </form>
+  <p>已有账号？<a href="login.html">去登录</a></p>
 
-    <p>已有账号？<a href="login.html">登录 / Login</a></p>
-  </main>
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
 
-  <footer>
-    <p>© 2025 Emovibe | Hope & Warmth for Everyone</p>
-  </footer>
+    const form = document.getElementById('join-form')
 
-  <script>
-    document.getElementById("join-form").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const nickname = document.getElementById("nickname").value;
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
-      const role = document.getElementById("role").value;
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
 
-      // 存储用户信息到本地 localStorage
-      const users = JSON.parse(localStorage.getItem("users")) || {};
-      if (users[username]) {
-        alert("❌ 该用户名已存在，请换一个！");
-        return;
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value
+      const nickname = document.getElementById('nickname').value
+      const role = document.getElementById('role').value
+
+      const { data, error } = await supabase.auth.signUp({ email, password })
+
+      if (error) {
+        alert('注册失败：' + error.message)
+        return
       }
 
-      users[username] = { nickname, password, role };
-      localStorage.setItem("users", JSON.stringify(users));
+      const { error: insertError } = await supabase
+        .from('profiles')
+        .insert([{ username: nickname, email, role }])
 
-      alert("✅ 注册成功！请登录。");
-      window.location.href = "login.html";
-    });
+      if (insertError) {
+        alert('保存资料失败：' + insertError.message)
+        return
+      }
+
+      alert('注册成功！请查收验证邮件！')
+      window.location.href = 'login.html'
+    })
   </script>
 </body>
 </html>
