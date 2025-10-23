@@ -1,53 +1,106 @@
-
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Emovibe - 让生活充满温暖 | Feel the Warmth of Life</title>
-  <link rel="stylesheet" href="assets/style.css">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Emovibe | 让生活充满温暖</title>
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
-  <header>
-    <h1>💛 Emovibe</h1>
-    <p>让生活充满温暖 · Feel the Warmth of Life</p>
-    <nav>
-      <a href="index.html">首页 / Home</a>
-      <a href="join.html">加入我们 / Join</a>
-      <a href="login.html">登录 / Login</a>
-    </nav>
+  <header class="site-header">
+    <div class="container header-inner">
+      <div class="brand">💙 Emovibe</div>
+      <nav class="nav">
+        <a href="index.html">首页</a>
+        <a href="chat.html">聊天室</a>
+        <a href="profile.html">我的资料</a>
+        <a href="join.html">注册</a>
+        <a href="login.html">登录</a>
+      </nav>
+      <div id="user-actions" class="user-actions"></div>
+    </div>
   </header>
 
-  <main>
-    <section class="welcome">
-      <h2>欢迎来到 Emovibe</h2>
-      <p>一个让人们倾诉、陪伴、疗愈、互相温暖的情感陪聊平台。</p>
-      <p>在这里，你可以成为陪聊师，也可以找到倾听你的人。</p>
-      <button onclick="window.location.href='join.html'">开始体验 / Start Now</button>
+  <main class="container main">
+    <section class="hero">
+      <h1>让生活充满温暖</h1>
+      <p class="lead">在 Emovibe，你可以倾诉、被听见、被理解。找到一个能陪你、能倾听的人。</p>
+
+      <div id="user-info" class="user-info">
+        <p>你好，<strong id="username">游客</strong>！</p>
+        <p id="bio">欢迎来到 Emovibe · Fill Life with Warmth</p>
+        <button id="logoutBtn" class="btn btn-ghost" style="display:none;">退出登录</button>
+      </div>
+
+      <div class="cta">
+        <a class="btn" href="chat.html">进入聊天室</a>
+        <a class="btn btn-light" href="join.html">立即注册</a>
+      </div>
     </section>
   </main>
 
-  <footer>
-    <p>© 2025 Emovibe | All Rights Reserved.</p>
+  <footer class="site-footer">
+    <div class="container">© 2025 Emovibe | 用心陪伴每一个情绪</div>
   </footer>
 
   <script type="module">
     import { supabase } from './assets/supabase.js'
 
-    const userArea = document.querySelector('header nav')
-    const { data: { session } } = await supabase.auth.getSession()
+    const usernameEl = document.getElementById('username')
+    const bioEl = document.getElementById('bio')
+    const logoutBtn = document.getElementById('logoutBtn')
+    const userActions = document.getElementById('user-actions')
 
-    if (session) {
-      userArea.innerHTML = `
-        <a href="index.html">首页</a>
-        <span>你好，${session.user.email}</span>
-        <a href="#" id="logout">退出</a>
-      `
-      document.getElementById('logout').addEventListener('click', async () => {
-        await supabase.auth.signOut()
-        window.location.reload()
-      })
+    async function showUser() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        if (!user) {
+          usernameEl.textContent = '游客'
+          bioEl.textContent = '欢迎来到 Emovibe · Fill Life with Warmth'
+          logoutBtn.style.display = 'none'
+          userActions.innerHTML = '<a class="small-link" href="login.html">登录</a>'
+          return
+        }
+
+        // 尝试从 profiles 表获取昵称与简介
+        const { data: profile, error } = await supabase
+          .from('profiles')
+          .select('username, bio')
+          .eq('user_id', user.id)
+          .single()
+
+        if (!error && profile && profile.username) {
+          usernameEl.textContent = profile.username
+          bioEl.textContent = profile.bio || '欢迎回来'
+        } else {
+          // 回退到 user metadata 或 email 前缀
+          const fallback = (user.user_metadata && (user.user_metadata.name || user.user_metadata.username)) || (user.email ? user.email.split('@')[0] : '用户')
+          usernameEl.textContent = fallback
+          bioEl.textContent = '欢迎回来'
+        }
+
+        logoutBtn.style.display = 'inline-block'
+        userActions.innerHTML = `<a class="small-link" href="profile.html">资料</a> <a class="small-link" id="logout-inline" href="#">退出</a>`
+        document.getElementById('logout-inline').addEventListener('click', async (e) => {
+          e.preventDefault()
+          await supabase.auth.signOut()
+          localStorage.removeItem('emovibe_nickname')
+          window.location.reload()
+        })
+      } catch (err) {
+        console.error('载入用户失败', err)
+        usernameEl.textContent = '游客'
+        bioEl.textContent = '欢迎来到 Emovibe'
+      }
     }
+
+    logoutBtn.addEventListener('click', async () => {
+      await supabase.auth.signOut()
+      localStorage.removeItem('emovibe_nickname')
+      window.location.reload()
+    })
+
+    showUser()
   </script>
 </body>
 </html>
