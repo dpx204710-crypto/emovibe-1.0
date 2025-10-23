@@ -1,128 +1,53 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emovibe | 温度与心灵的连接</title>
-  <link rel="stylesheet" href="style.css">
-  <style>
-    body {
-      font-family: "Microsoft YaHei", sans-serif;
-      background: linear-gradient(to bottom, #b7e1ff, #ffffff);
-      color: #222;
-      margin: 0;
-      padding: 0;
-      text-align: center;
-    }
-    header {
-      background-color: #4da6ff;
-      color: white;
-      padding: 20px 10px;
-    }
-    nav a {
-      color: white;
-      margin: 0 10px;
-      text-decoration: none;
-      font-weight: bold;
-    }
-    nav a:hover {
-      text-decoration: underline;
-    }
-    main {
-      padding: 30px 20px;
-    }
-    .btn-group {
-      margin-top: 25px;
-    }
-    .btn {
-      display: inline-block;
-      background-color: #4da6ff;
-      color: white;
-      padding: 10px 18px;
-      margin: 6px;
-      border-radius: 6px;
-      text-decoration: none;
-      transition: 0.3s;
-    }
-    .btn:hover {
-      background-color: #0066cc;
-    }
-    footer {
-      background: #e0f2ff;
-      color: #555;
-      padding: 20px;
-      font-size: 14px;
-      margin-top: 40px;
-    }
-    #user-info {
-      margin-top: 20px;
-      font-size: 16px;
-    }
-    #logout-btn {
-      background-color: #ff4d4d;
-      color: white;
-      border: none;
-      padding: 8px 16px;
-      border-radius: 5px;
-      cursor: pointer;
-      margin-top: 10px;
-    }
-  </style>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Emovibe - 让生活充满温暖 | Feel the Warmth of Life</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
   <header>
-    <h1>Emovibe 💙</h1>
+    <h1>💛 Emovibe</h1>
+    <p>让生活充满温暖 · Feel the Warmth of Life</p>
     <nav>
-      <a href="index.html" class="active">首页 / Home</a>
-      <a href="login.html">登录 / Login</a>
+      <a href="index.html">首页 / Home</a>
       <a href="join.html">加入我们 / Join</a>
-      <a href="chat.html">聊天室 / Chat</a>
+      <a href="login.html">登录 / Login</a>
     </nav>
   </header>
 
   <main>
-    <h2>欢迎来到 Emovibe</h2>
-    <p>在这里，你可以倾诉、陪伴、疗愈，获取温暖与理解。</p>
-
-    <div id="user-info">
-      <p>你好，<span id="username">游客</span>！</p>
-      <p id="bio">欢迎来到 Emovibe 🌙</p>
-      <button id="logout-btn" style="display:none;">退出登录</button>
-    </div>
-
-    <div class="btn-group">
-      <a href="login.html" class="btn">登录 / Login</a>
-      <a href="join.html" class="btn">注册 / Join</a>
-      <a href="chat.html" class="btn">进入聊天室 / Chat</a>
-    </div>
+    <section class="welcome">
+      <h2>欢迎来到 Emovibe</h2>
+      <p>一个让人们倾诉、陪伴、疗愈、互相温暖的情感陪聊平台。</p>
+      <p>在这里，你可以成为陪聊师，也可以找到倾听你的人。</p>
+      <button onclick="window.location.href='join.html'">开始体验 / Start Now</button>
+    </section>
   </main>
 
   <footer>
-    <p>© 2025 Emovibe | Hope & Warmth for Everyone</p>
+    <p>© 2025 Emovibe | All Rights Reserved.</p>
   </footer>
 
-  <script>
-    // 读取当前登录的用户
-    const user = JSON.parse(localStorage.getItem("currentUser"));
-    const usernameSpan = document.getElementById("username");
-    const bio = document.getElementById("bio");
-    const logoutBtn = document.getElementById("logout-btn");
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
 
-    if (user) {
-      usernameSpan.textContent = user.nickname;
-      bio.textContent = `欢迎回来，${user.nickname} 💫`;
-      logoutBtn.style.display = "inline-block";
-    } else {
-      usernameSpan.textContent = "游客";
-      bio.textContent = "欢迎来到 Emovibe 🌙";
+    const userArea = document.querySelector('header nav')
+    const { data: { session } } = await supabase.auth.getSession()
+
+    if (session) {
+      userArea.innerHTML = `
+        <a href="index.html">首页</a>
+        <span>你好，${session.user.email}</span>
+        <a href="#" id="logout">退出</a>
+      `
+      document.getElementById('logout').addEventListener('click', async () => {
+        await supabase.auth.signOut()
+        window.location.reload()
+      })
     }
-
-    // 退出登录逻辑
-    logoutBtn.addEventListener("click", () => {
-      localStorage.removeItem("currentUser");
-      alert("您已退出登录 👋");
-      window.location.reload();
-    });
   </script>
 </body>
 </html>
