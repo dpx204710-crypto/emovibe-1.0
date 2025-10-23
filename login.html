@@ -1,63 +1,45 @@
+
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>登录 | Emovibe</title>
-  <link rel="stylesheet" href="style.css">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>登录 Emovibe</title>
+  <link rel="stylesheet" href="assets/style.css">
 </head>
 <body>
-  <header>
-    <h1>Emovibe</h1>
-    <nav>
-      <a href="index.html">首页 / Home</a>
-      <a href="login.html" class="active">登录 / Login</a>
-      <a href="join.html">加入我们 / Join</a>
-    </nav>
-  </header>
+  <h1>登录 / Login</h1>
+  <form id="login-form">
+    <label>邮箱 / Email</label>
+    <input type="email" id="email" required />
 
-  <main>
-    <h2>登录 / Login</h2>
-    <form id="login-form">
-      <label>账号 / Username</label>
-      <input type="text" id="username" required>
+    <label>密码 / Password</label>
+    <input type="password" id="password" required />
 
-      <label>密码 / Password</label>
-      <input type="password" id="password" required>
+    <button type="submit">登录 / Login</button>
+  </form>
 
-      <button type="submit">登录 / Login</button>
-    </form>
-    <p>还没有账号？<a href="join.html">注册 / Join</a></p>
-  </main>
+  <p>还没有账号？<a href="join.html">注册一个</a></p>
 
-  <footer>
-    <p>© 2025 Emovibe | Hope & Warmth for Everyone</p>
-  </footer>
+  <script type="module">
+    import { supabase } from './assets/supabase.js'
 
-  <script>
-    document.getElementById("login-form").addEventListener("submit", function(e) {
-      e.preventDefault();
-      const username = document.getElementById("username").value;
-      const password = document.getElementById("password").value;
+    const form = document.getElementById('login-form')
 
-      const users = JSON.parse(localStorage.getItem("users")) || {};
-      const user = users[username];
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      const email = document.getElementById('email').value
+      const password = document.getElementById('password').value
 
-      if (!user) {
-        alert("❌ 用户不存在，请先注册。");
-        return;
+      const { error } = await supabase.auth.signInWithPassword({ email, password })
+
+      if (error) {
+        alert('登录失败：' + error.message)
+      } else {
+        alert('登录成功！')
+        window.location.href = 'index.html'
       }
-
-      if (user.password !== password) {
-        alert("❌ 密码错误，请重试。");
-        return;
-      }
-
-      // 登录成功后保存当前用户
-      localStorage.setItem("currentUser", JSON.stringify(user));
-      alert(`✅ 欢迎回来，${user.nickname}！`);
-      window.location.href = "index.html";
-    });
+    })
   </script>
 </body>
 </html>
