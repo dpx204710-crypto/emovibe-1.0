@@ -1,13 +1,7 @@
-/* 🌸 Emovibe - 温柔治愈系聊天室样式 */
-/* Designed with love and calmness 💫 */
-
-@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
-
 body {
-  font-family: 'Noto Sans SC', sans-serif;
-  background: linear-gradient(180deg, #eaf3ff 0%, #f7fbff 100%);
   margin: 0;
-  padding: 0;
+  font-family: "Poppins", "Microsoft Yahei", sans-serif;
+  background: #f0f4f8;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,119 +9,81 @@ body {
 }
 
 .chat-container {
-  width: 95%;
-  max-width: 520px;
-  height: 85vh;
-  background: #ffffff;
-  border-radius: 18px;
-  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  background: white;
+  width: 90%;
+  max-width: 500px;
+  height: 90vh;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
 }
 
-/* 顶部标题栏 */
 .chat-header {
-  background: #007aff;
+  background: linear-gradient(135deg, #007bff, #00d4ff);
   color: white;
-  padding: 18px;
   text-align: center;
-  font-weight: 600;
-  letter-spacing: 1px;
-  font-size: 18px;
+  padding: 15px;
+  border-radius: 15px 15px 0 0;
 }
 
-/* 聊天区 */
-.messages {
+.chat-box {
   flex: 1;
-  padding: 18px;
+  padding: 15px;
   overflow-y: auto;
-  background-color: #f6f9fc;
-  scroll-behavior: smooth;
+  display: flex;
+  flex-direction: column;
 }
 
-/* 消息气泡 */
 .message {
+  margin-bottom: 10px;
   max-width: 75%;
-  margin-bottom: 14px;
-  line-height: 1.6;
-  word-wrap: break-word;
-  padding: 12px 16px;
-  border-radius: 14px;
-  display: inline-block;
+  padding: 10px 14px;
+  border-radius: 12px;
+  line-height: 1.5;
   font-size: 15px;
-  animation: fadeIn 0.25s ease;
+  word-wrap: break-word;
 }
 
-/* 用户消息（蓝色右侧） */
-.user {
-  background-color: #007aff;
+.message.user {
+  background: #007bff;
   color: white;
   align-self: flex-end;
-  border-bottom-right-radius: 4px;
-  margin-left: auto;
+  border-bottom-right-radius: 2px;
 }
 
-/* AI消息（灰色左侧） */
-.ai {
-  background-color: #eaeef3;
+.message.ai {
+  background: #e5e5ea;
   color: #333;
   align-self: flex-start;
-  border-bottom-left-radius: 4px;
-  margin-right: auto;
+  border-bottom-left-radius: 2px;
 }
 
-/* 输入栏 */
-.input-area {
+.chat-input-area {
   display: flex;
-  border-top: 1px solid #e3e3e3;
-  background: #ffffff;
+  border-top: 1px solid #ddd;
   padding: 10px;
+  background: #fafafa;
 }
 
-.input-area input {
+.chat-input-area input {
   flex: 1;
-  border: none;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 10px;
   outline: none;
-  font-size: 15px;
-  padding: 12px;
-  border-radius: 10px;
-  background-color: #f1f3f6;
-  transition: all 0.2s ease;
 }
 
-.input-area input:focus {
-  background-color: #e6efff;
-}
-
-.input-area button {
-  border: none;
-  background-color: #007aff;
+.chat-input-area button {
+  background: #007bff;
   color: white;
-  font-size: 15px;
-  font-weight: 500;
-  padding: 0 18px;
+  border: none;
+  margin-left: 10px;
+  padding: 10px 18px;
   border-radius: 10px;
-  margin-left: 8px;
   cursor: pointer;
-  transition: all 0.2s ease;
 }
 
-.input-area button:hover {
-  background-color: #0062d9;
-}
-
-/* 滚动条优化 */
-.messages::-webkit-scrollbar {
-  width: 6px;
-}
-.messages::-webkit-scrollbar-thumb {
-  background: #cccccc;
-  border-radius: 4px;
-}
-
-/* 淡入动画 */
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: translateY(0); }
+.chat-input-area button:hover {
+  background: #0056b3;
 }
