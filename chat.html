@@ -1,120 +1,120 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emovibe 聊天</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emovibe 聊天室</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <style>
     body {
-      font-family: "Segoe UI", sans-serif;
-      background: linear-gradient(135deg, #a0c4ff, #bdb2ff);
+      background: #f2f4f8;
+      font-family: "Noto Sans SC", sans-serif;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-box {
+      width: 90%;
+      max-width: 480px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 3px 15px rgba(0,0,0,0.1);
       display: flex;
       flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      min-height: 100vh;
-      margin: 0;
-      color: #333;
+      height: 80vh;
+      overflow: hidden;
     }
-    h1 {
-      margin-bottom: 20px;
-      color: #fff;
-      text-shadow: 0 2px 4px rgba(0,0,0,0.3);
-    }
-    #chat-box {
-      width: 90%;
-      max-width: 600px;
-      height: 60vh;
-      background: rgba(255, 255, 255, 0.8);
-      border-radius: 12px;
-      padding: 15px;
+    .messages {
+      flex: 1;
       overflow-y: auto;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      padding: 20px;
     }
-    .msg {
-      margin: 10px 0;
+    .message {
+      margin-bottom: 15px;
       line-height: 1.5;
     }
     .user {
       text-align: right;
-      color: #0077ff;
+      color: #007aff;
     }
     .ai {
       text-align: left;
-      color: #444;
+      color: #555;
     }
-    #input-area {
+    .input-box {
       display: flex;
-      margin-top: 15px;
-      width: 90%;
-      max-width: 600px;
+      border-top: 1px solid #eee;
     }
     input {
       flex: 1;
-      padding: 10px;
-      border-radius: 8px;
-      border: 1px solid #ccc;
+      border: none;
+      padding: 15px;
       font-size: 16px;
       outline: none;
     }
     button {
-      margin-left: 10px;
-      padding: 10px 18px;
       border: none;
-      border-radius: 8px;
-      background: #0077ff;
+      background: #007aff;
       color: white;
-      font-size: 16px;
+      padding: 0 20px;
       cursor: pointer;
-      transition: background 0.3s;
-    }
-    button:hover {
-      background: #005ed6;
     }
   </style>
 </head>
 <body>
-  <h1>Emovibe 聊天室 💬</h1>
-  <div id="chat-box"></div>
-  <div id="input-area">
-    <input type="text" id="message" placeholder="说点什么..." />
-    <button onclick="sendMessage()">发送</button>
+  <div class="chat-box">
+    <div class="messages" id="messages"></div>
+    <div class="input-box">
+      <input id="userInput" type="text" placeholder="输入你的心情..." />
+      <button id="sendBtn">发送</button>
+    </div>
   </div>
 
   <script>
-    const chatBox = document.getElementById("chat-box");
-    const input = document.getElementById("message");
+    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const messagesDiv = document.getElementById("messages");
+    const input = document.getElementById("userInput");
+    const sendBtn = document.getElementById("sendBtn");
 
     async function sendMessage() {
-      const text = input.value.trim();
-      if (!text) return;
-      appendMessage("你", text, "user");
+      const message = input.value.trim();
+      if (!message) return;
+
+      // 显示用户消息
+      appendMessage("user", message);
       input.value = "";
 
-      try {
-        const res = await fetch("/api/chat", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ message: text })
-        });
-        const data = await res.json();
-        appendMessage("Emovibe", data.reply, "ai");
-      } catch (err) {
-        appendMessage("系统", "连接出错，请稍后再试。", "ai");
-      }
+      // 保存到数据库
+      await supabase.from("messages").insert([{ role: "user", content: message }]);
+
+      // 发送到 OpenAI API
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message })
+      });
+      const data = await response.json();
+
+      // 显示AI消息并保存
+      appendMessage("ai", data.reply);
+      await supabase.from("messages").insert([{ role: "ai", content: data.reply }]);
     }
 
-    function appendMessage(sender, text, type) {
+    function appendMessage(role, content) {
       const div = document.createElement("div");
-      div.classList.add("msg", type);
-      div.textContent = `${sender}: ${text}`;
-      chatBox.appendChild(div);
-      chatBox.scrollTop = chatBox.scrollHeight;
+      div.className = `message ${role}`;
+      div.textContent = content;
+      messagesDiv.appendChild(div);
+      messagesDiv.scrollTop = messagesDiv.scrollHeight;
     }
 
-    input.addEventListener("keypress", (e) => {
-      if (e.key === "Enter") sendMessage();
-    });
+    sendBtn.addEventListener("click", sendMessage);
   </script>
 </body>
 </html>
