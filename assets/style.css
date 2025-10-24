@@ -1,47 +1,133 @@
+/* 🌸 Emovibe - 温柔治愈系聊天室样式 */
+/* Designed with love and calmness 💫 */
 
-/* assets/style.css - 蓝白温柔风 */
+@import url('https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700&display=swap');
 
-:root {
-  --primary: #4da6ff;
-  --muted: #8aa8c9;
-  --bg: #f6fbff;
-  --card: #ffffff;
-  --text: #123;
+body {
+  font-family: 'Noto Sans SC', sans-serif;
+  background: linear-gradient(180deg, #eaf3ff 0%, #f7fbff 100%);
+  margin: 0;
+  padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
 }
 
-* { box-sizing: border-box; }
-html,body { height:100%; margin:0; padding:0; background: linear-gradient(180deg,#e9f6ff,#ffffff); color:var(--text); font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif; }
-
-.container { max-width:1000px; margin:0 auto; padding:16px; }
-
-.site-header { background: transparent; padding:12px 0; }
-.header-inner { display:flex; align-items:center; justify-content:space-between; }
-.brand { font-size:20px; font-weight:700; color:var(--primary); }
-.nav a { color:var(--text); margin:0 8px; text-decoration:none; font-weight:600; }
-.nav a:hover { text-decoration:underline; }
-
-.main { padding:18px 0; }
-
-.hero { text-align:center; padding:28px 12px; }
-.hero h1 { margin:6px 0; font-size:28px; color:var(--primary); }
-.lead { color:var(--muted); margin-top:8px; }
-
-.user-info { margin:18px auto; padding:14px; max-width:480px; background:var(--card); border-radius:10px; box-shadow:0 6px 18px rgba(28,64,120,0.06); }
-.user-info p { margin:6px 0; }
-
-.btn { display:inline-block; background:var(--primary); color:#fff; padding:10px 18px; border-radius:8px; text-decoration:none; font-weight:700; border:none; cursor:pointer; }
-.btn:hover { filter:brightness(0.95); transform:translateY(-2px); transition:all .18s ease; }
-
-.btn-light { background:#fff; color:var(--primary); border:1px solid var(--primary); }
-.btn-ghost { background:transparent; color:var(--primary); border:1px solid rgba(77,166,255,0.15); }
-
-.card { background:var(--card); padding:22px; border-radius:10px; box-shadow:0 8px 24px rgba(18,40,80,0.06); max-width:520px; margin:24px auto; text-align:left; }
-
-label { display:block; margin-top:12px; color:#345; font-weight:600; }
-input[type="text"], input[type="email"], input[type="password"], select, textarea {
-  width:100%; padding:10px 12px; margin-top:6px; border-radius:8px; border:1px solid #e6eef9; background:#fbfeff; color:var(--text);
+.chat-container {
+  width: 95%;
+  max-width: 520px;
+  height: 85vh;
+  background: #ffffff;
+  border-radius: 18px;
+  box-shadow: 0 8px 25px rgba(0,0,0,0.1);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
-.muted { color:#6f8aa3; font-size:14px; }
-.small-link { color:var(--primary); text-decoration:none; margin-left:8px; font-size:14px; }
-.site-footer { margin-top:32px; padding:18px 0; color:#7a8fa6; font-size:14px; }
+/* 顶部标题栏 */
+.chat-header {
+  background: #007aff;
+  color: white;
+  padding: 18px;
+  text-align: center;
+  font-weight: 600;
+  letter-spacing: 1px;
+  font-size: 18px;
+}
+
+/* 聊天区 */
+.messages {
+  flex: 1;
+  padding: 18px;
+  overflow-y: auto;
+  background-color: #f6f9fc;
+  scroll-behavior: smooth;
+}
+
+/* 消息气泡 */
+.message {
+  max-width: 75%;
+  margin-bottom: 14px;
+  line-height: 1.6;
+  word-wrap: break-word;
+  padding: 12px 16px;
+  border-radius: 14px;
+  display: inline-block;
+  font-size: 15px;
+  animation: fadeIn 0.25s ease;
+}
+
+/* 用户消息（蓝色右侧） */
+.user {
+  background-color: #007aff;
+  color: white;
+  align-self: flex-end;
+  border-bottom-right-radius: 4px;
+  margin-left: auto;
+}
+
+/* AI消息（灰色左侧） */
+.ai {
+  background-color: #eaeef3;
+  color: #333;
+  align-self: flex-start;
+  border-bottom-left-radius: 4px;
+  margin-right: auto;
+}
+
+/* 输入栏 */
+.input-area {
+  display: flex;
+  border-top: 1px solid #e3e3e3;
+  background: #ffffff;
+  padding: 10px;
+}
+
+.input-area input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 15px;
+  padding: 12px;
+  border-radius: 10px;
+  background-color: #f1f3f6;
+  transition: all 0.2s ease;
+}
+
+.input-area input:focus {
+  background-color: #e6efff;
+}
+
+.input-area button {
+  border: none;
+  background-color: #007aff;
+  color: white;
+  font-size: 15px;
+  font-weight: 500;
+  padding: 0 18px;
+  border-radius: 10px;
+  margin-left: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.input-area button:hover {
+  background-color: #0062d9;
+}
+
+/* 滚动条优化 */
+.messages::-webkit-scrollbar {
+  width: 6px;
+}
+.messages::-webkit-scrollbar-thumb {
+  background: #cccccc;
+  border-radius: 4px;
+}
+
+/* 淡入动画 */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
