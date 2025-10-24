@@ -1,70 +1,90 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emovibe Chat</title>
-  <link rel="stylesheet" href="assets/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emovibe 聊天室</title>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <style>
     body {
-      font-family: "Poppins", sans-serif;
-      background: #f0f7ff;
-      color: #333;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      font-family: 'Helvetica Neue', sans-serif;
+      background-color: #f3f8ff;
+      margin: 0; padding: 0;
+      display: flex; flex-direction: column;
       height: 100vh;
     }
-    .chat-box {
-      width: 90%;
-      max-width: 600px;
-      height: 70vh;
-      overflow-y: auto;
-      background: white;
-      border-radius: 10px;
-      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    #chat-box {
+      flex: 1; overflow-y: auto;
       padding: 20px;
-      margin-top: 20px;
     }
-    .message {
-      margin: 10px 0;
-      line-height: 1.6;
-    }
-    .user { text-align: right; color: #007aff; }
-    .ai { text-align: left; color: #333; }
-    .input-box {
-      display: flex;
-      margin-top: 15px;
-      width: 90%;
-      max-width: 600px;
-    }
-    input {
-      flex: 1;
-      padding: 10px;
-      border-radius: 6px;
-      border: 1px solid #ccc;
-    }
-    button {
-      background: #007aff;
-      color: white;
-      border: none;
-      padding: 10px 20px;
-      border-radius: 6px;
-      margin-left: 10px;
-      cursor: pointer;
-    }
+    .msg { margin: 10px 0; padding: 10px 15px; border-radius: 10px; max-width: 75%; }
+    .user { background-color: #007bff; color: white; margin-left: auto; }
+    .ai { background-color: #e6e9ef; color: #333; margin-right: auto; }
+    #input-area { display: flex; padding: 10px; border-top: 1px solid #ccc; }
+    input { flex: 1; padding: 10px; border-radius: 8px; border: 1px solid #aaa; }
+    button { margin-left: 10px; padding: 10px 15px; background-color: #007bff; color: white; border: none; border-radius: 8px; }
   </style>
 </head>
 <body>
-  <h2>💬 Emovibe Chat</h2>
-
-  <div class="chat-box" id="chat-box"></div>
-
-  <div class="input-box">
-    <input type="text" id="userInput" placeholder="说点什么吧..." />
+  <div id="chat-box"></div>
+  <div id="input-area">
+    <input id="messageInput" placeholder="说点什么吧..." />
     <button onclick="sendMessage()">发送</button>
   </div>
 
-  <script src="chat.js"></script>
+  <script>
+    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
+    const supabase = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+
+    const chatBox = document.getElementById("chat-box");
+    const input = document.getElementById("messageInput");
+
+    // 🧩 加载历史消息
+    async function loadMessages() {
+      const { data, error } = await supabase
+        .from("messages")
+        .select("*")
+        .order("created_at", { ascending: true });
+      if (error) console.error(error);
+      else data.forEach(msg => displayMessage(msg.message, msg.is_ai));
+    }
+
+    // 💬 显示消息
+    function displayMessage(text, isAI = false) {
+      const div = document.createElement("div");
+      div.className = `msg ${isAI ? "ai" : "user"}`;
+      div.textContent = text;
+      chatBox.appendChild(div);
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    // 🚀 发送消息
+    async function sendMessage() {
+      const message = input.value.trim();
+      if (!message) return;
+
+      displayMessage(message, false);
+      input.value = "";
+
+      await supabase.from("messages").insert([{ user: "访客", message, is_ai: false }]);
+
+      const response = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message }),
+      });
+
+      const data = await response.json();
+      const reply = data.reply || "（AI暂时没反应）";
+
+      displayMessage(reply, true);
+
+      await supabase.from("messages").insert([{ user: "Emovibe", message: reply, is_ai: true }]);
+    }
+
+    // 初始化加载
+    loadMessages();
+  </script>
 </body>
 </html>
