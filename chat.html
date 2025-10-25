@@ -1,29 +1,48 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Emovibe Chat</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<title>聊天 - Emovibe</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
 </head>
 <body>
-  <div class="chat-container">
-    <header class="chat-header">
-      <h1>💬 Emovibe Chat</h1>
-    </header>
+<div class="container">
+  <h1>聊天中 💬</h1>
+  <div id="chatBox" style="height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;border-radius:8px;"></div>
 
-    <main id="chat-box" class="chat-box">
-      <div class="message ai">
-        <p>你好，我是 Emovibe！今天想聊点什么？</p>
-      </div>
-    </main>
+  <input id="messageInput" placeholder="输入消息..." />
+  <button id="sendBtn">发送</button>
+  <button id="logoutBtn">退出</button>
+</div>
 
-    <footer class="chat-input-area">
-      <input type="text" id="user-input" placeholder="输入内容..." autocomplete="off" />
-      <button id="send-btn">发送</button>
-    </footer>
-  </div>
+<script type="module">
+import { supabase, sendMessage, listenMessages } from './app.js'
 
-  <script src="chat.js"></script>
+const params = new URLSearchParams(window.location.search)
+const roomId = params.get('room')
+const chatBox = document.getElementById('chatBox')
+
+async function addMessage(msg) {
+  const div = document.createElement('div')
+  div.textContent = msg.content
+  chatBox.appendChild(div)
+  chatBox.scrollTop = chatBox.scrollHeight
+}
+
+listenMessages(roomId, addMessage)
+
+document.getElementById('sendBtn').onclick = async () => {
+  const content = document.getElementById('messageInput').value
+  if (!content) return
+  await sendMessage(roomId, null, content)
+  document.getElementById('messageInput').value = ''
+}
+
+document.getElementById('logoutBtn').onclick = async () => {
+  await supabase.auth.signOut()
+  window.location = 'index.html'
+}
+</script>
 </body>
 </html>
