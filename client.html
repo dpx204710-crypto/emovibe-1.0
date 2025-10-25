@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>客户下单 - Emovibe</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>选择你的陪聊师</h1>
+  <p>选择你想要的陪聊类型，提交后等待接单</p>
+
+  <select id="gender_preference">
+    <option value="female">女陪聊师</option>
+    <option value="male">男陪聊师</option>
+  </select>
+
+  <select id="style_preference">
+    <option value="gentle">温柔倾听型</option>
+    <option value="funny">幽默陪伴型</option>
+    <option value="quiet">安静陪伴型</option>
+  </select>
+
+  <button id="submitOrder">提交下单</button>
+  <button id="logoutBtn">退出登录</button>
+
+  <div id="status"></div>
+</div>
+
+<script type="module">
+import { supabase, createRequest } from './app.js'
+
+document.getElementById('submitOrder').onclick = async () => {
+  const gender = document.getElementById('gender_preference').value
+  const style = document.getElementById('style_preference').value
+  await createRequest(gender, style)
+  document.getElementById('status').innerHTML = '✅ 下单成功，请等待陪聊师接单...'
+}
+
+document.getElementById('logoutBtn').onclick = async () => {
+  await supabase.auth.signOut()
+  window.location = 'index.html'
+}
+</script>
+</body>
+</html>
