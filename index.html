@@ -1,106 +1,28 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Emovibe | 让生活充满温暖</title>
-  <link rel="stylesheet" href="assets/style.css" />
+<meta charset="UTF-8">
+<title>Emovibe 登录</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
 </head>
 <body>
-  <header class="site-header">
-    <div class="container header-inner">
-      <div class="brand">💙 Emovibe</div>
-      <nav class="nav">
-        <a href="index.html">首页</a>
-        <a href="chat.html">聊天室</a>
-        <a href="profile.html">我的资料</a>
-        <a href="join.html">注册</a>
-        <a href="login.html">登录</a>
-      </nav>
-      <div id="user-actions" class="user-actions"></div>
-    </div>
-  </header>
+<div class="container">
+  <h1>Emovibe</h1>
+  <input id="email" placeholder="邮箱">
+  <input id="password" type="password" placeholder="密码">
+  <select id="role">
+    <option value="client">我是客户</option>
+    <option value="companion">我是陪聊师</option>
+  </select>
+  <button id="loginBtn">登录</button>
+  <button id="registerBtn">注册</button>
+</div>
 
-  <main class="container main">
-    <section class="hero">
-      <h1>让生活充满温暖</h1>
-      <p class="lead">在 Emovibe，你可以倾诉、被听见、被理解。找到一个能陪你、能倾听的人。</p>
-
-      <div id="user-info" class="user-info">
-        <p>你好，<strong id="username">游客</strong>！</p>
-        <p id="bio">欢迎来到 Emovibe · Fill Life with Warmth</p>
-        <button id="logoutBtn" class="btn btn-ghost" style="display:none;">退出登录</button>
-      </div>
-
-      <div class="cta">
-        <a class="btn" href="chat.html">进入聊天室</a>
-        <a class="btn btn-light" href="join.html">立即注册</a>
-      </div>
-    </section>
-  </main>
-
-  <footer class="site-footer">
-    <div class="container">© 2025 Emovibe | 用心陪伴每一个情绪</div>
-  </footer>
-
-  <script type="module">
-    import { supabase } from './assets/supabase.js'
-
-    const usernameEl = document.getElementById('username')
-    const bioEl = document.getElementById('bio')
-    const logoutBtn = document.getElementById('logoutBtn')
-    const userActions = document.getElementById('user-actions')
-
-    async function showUser() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser()
-        if (!user) {
-          usernameEl.textContent = '游客'
-          bioEl.textContent = '欢迎来到 Emovibe · Fill Life with Warmth'
-          logoutBtn.style.display = 'none'
-          userActions.innerHTML = '<a class="small-link" href="login.html">登录</a>'
-          return
-        }
-
-        // 尝试从 profiles 表获取昵称与简介
-        const { data: profile, error } = await supabase
-          .from('profiles')
-          .select('username, bio')
-          .eq('user_id', user.id)
-          .single()
-
-        if (!error && profile && profile.username) {
-          usernameEl.textContent = profile.username
-          bioEl.textContent = profile.bio || '欢迎回来'
-        } else {
-          // 回退到 user metadata 或 email 前缀
-          const fallback = (user.user_metadata && (user.user_metadata.name || user.user_metadata.username)) || (user.email ? user.email.split('@')[0] : '用户')
-          usernameEl.textContent = fallback
-          bioEl.textContent = '欢迎回来'
-        }
-
-        logoutBtn.style.display = 'inline-block'
-        userActions.innerHTML = `<a class="small-link" href="profile.html">资料</a> <a class="small-link" id="logout-inline" href="#">退出</a>`
-        document.getElementById('logout-inline').addEventListener('click', async (e) => {
-          e.preventDefault()
-          await supabase.auth.signOut()
-          localStorage.removeItem('emovibe_nickname')
-          window.location.reload()
-        })
-      } catch (err) {
-        console.error('载入用户失败', err)
-        usernameEl.textContent = '游客'
-        bioEl.textContent = '欢迎来到 Emovibe'
-      }
-    }
-
-    logoutBtn.addEventListener('click', async () => {
-      await supabase.auth.signOut()
-      localStorage.removeItem('emovibe_nickname')
-      window.location.reload()
-    })
-
-    showUser()
-  </script>
+<script type="module">
+import { login, register } from './app.js'
+document.getElementById('loginBtn').onclick = () => login(email.value, password.value)
+document.getElementById('registerBtn').onclick = () => register(email.value, password.value, '用户', '未知', role.value)
+</script>
 </body>
 </html>
