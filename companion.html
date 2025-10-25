@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<title>陪聊师接单 - Emovibe</title>
+<link rel="stylesheet" href="style.css">
+<script type="module" src="app.js"></script>
+</head>
+<body>
+<div class="container">
+  <h1>接单中心</h1>
+  <p>查看等待接单的客户</p>
+  <div id="orders"></div>
+  <button id="refreshBtn">刷新订单</button>
+  <button id="logoutBtn">退出登录</button>
+</div>
+
+<script type="module">
+import { supabase, getPendingRequests, acceptRequest } from './app.js'
+
+async function loadOrders() {
+  const data = await getPendingRequests()
+  const container = document.getElementById('orders')
+  container.innerHTML = ''
+  if (!data || data.length === 0) {
+    container.innerHTML = '<p>暂无等待接单的客户</p>'
+    return
+  }
+  data.forEach(req => {
+    const div = document.createElement('div')
+    div.innerHTML = `
+      <div style="border:1px solid #ddd; padding:10px; margin:8px; border-radius:6px;">
+        <p>性别偏好：${req.gender_preference}</p>
+        <p>性格偏好：${req.style_preference}</p>
+        <button onclick="accept(${req.id})">接单</button>
+      </div>
+    `
+    container.appendChild(div)
+  })
+}
+
+window.accept = async (id) => {
+  await acceptRequest(id)
+}
+
+document.getElementById('refreshBtn').onclick = loadOrders
+document.getElementById('logoutBtn').onclick = async () => {
+  await supabase.auth.signOut()
+  window.location = 'index.html'
+}
+
+loadOrders()
+</script>
+</body>
+</html>
