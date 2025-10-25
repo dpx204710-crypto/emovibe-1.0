@@ -1,48 +1,53 @@
-<!DOCTYPE html>
-<html lang="zh">
+<!-- chat.html -->
+<!doctype html>
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>聊天 - Emovibe</title>
-<link rel="stylesheet" href="style.css">
-<script type="module" src="app.js"></script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Emovibe 聊天 — 一对一陪聊</title>
+  <link rel="stylesheet" href="/assets/style.css" />
+  <style>
+    /* 简洁样式，放到 style.css 更好，临时内联保证能直接运行 */
+    body{font-family:system-ui, -apple-system, "Microsoft YaHei", sans-serif;background:#f2f8fb;color:#123;}
+    .container{max-width:760px;margin:20px auto;padding:12px}
+    header{background:#4fa1d6;padding:24px;border-radius:8px;color:#fff;text-align:center}
+    #chatWindow{min-height:300px;background:#fff;border-radius:8px;padding:12px;margin-top:12px;overflow:auto;border:1px solid #e2eef7}
+    .msg{margin:8px 0;padding:10px;border-radius:8px;max-width:80%}
+    .msg.user{background:#dff0ff;margin-left:auto}
+    .msg.companion{background:#f4f6fa}
+    #inputBar{display:flex;gap:8px;margin-top:12px}
+    #text{flex:1;padding:10px;border-radius:8px;border:1px solid #cbdbea}
+    button{background:#f3b63c;border:none;padding:10px 14px;border-radius:8px;color:#fff;cursor:pointer}
+    .list-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .listener-card{padding:10px;border-radius:8px;background:#fff;border:1px solid #e6f2fb;cursor:pointer}
+  </style>
 </head>
 <body>
-<div class="container">
-  <h1>聊天中 💬</h1>
-  <div id="chatBox" style="height:300px;overflow-y:auto;border:1px solid #ccc;padding:10px;border-radius:8px;"></div>
+  <div class="container">
+    <header>
+      <h1>Emovibe 聊天 / One-on-One</h1>
+      <p>请选择陪聊师并下单 — 陪聊师接单后开始一对一聊天</p>
+    </header>
 
-  <input id="messageInput" placeholder="输入消息..." />
-  <button id="sendBtn">发送</button>
-  <button id="logoutBtn">退出</button>
-</div>
+    <div id="userInfo" style="margin-top:12px"></div>
 
-<script type="module">
-import { supabase, sendMessage, listenMessages } from './app.js'
+    <!-- 陪聊师列表（客户可以从中选一个发起请求） -->
+    <section>
+      <h3>在线陪聊师</h3>
+      <div id="listeners" class="list-container">加载中…</div>
+    </section>
 
-const params = new URLSearchParams(window.location.search)
-const roomId = params.get('room')
-const chatBox = document.getElementById('chatBox')
+    <!-- 当前会话区域 -->
+    <section id="sessionArea" style="display:none;">
+      <h3 id="sessionTitle">会话</h3>
+      <div id="chatWindow"></div>
+      <div id="inputBar">
+        <input id="text" placeholder="说点什么吧..." />
+        <button id="sendBtn">发送</button>
+      </div>
+    </section>
+  </div>
 
-async function addMessage(msg) {
-  const div = document.createElement('div')
-  div.textContent = msg.content
-  chatBox.appendChild(div)
-  chatBox.scrollTop = chatBox.scrollHeight
-}
-
-listenMessages(roomId, addMessage)
-
-document.getElementById('sendBtn').onclick = async () => {
-  const content = document.getElementById('messageInput').value
-  if (!content) return
-  await sendMessage(roomId, null, content)
-  document.getElementById('messageInput').value = ''
-}
-
-document.getElementById('logoutBtn').onclick = async () => {
-  await supabase.auth.signOut()
-  window.location = 'index.html'
-}
-</script>
+  <script type="module" src="/chat.js"></script>
 </body>
 </html>
