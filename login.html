@@ -1,78 +1,37 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Emovibe 登录注册</title>
-<style>
-  body {
-    font-family: "Noto Sans SC", sans-serif;
-    background: linear-gradient(135deg,#e0e7ff,#fef9c3);
-    display:flex;flex-direction:column;align-items:center;justify-content:center;height:100vh;
-  }
-  h1 {color:#3b82f6;}
-  .box {
-    background:white;padding:20px;border-radius:12px;box-shadow:0 4px 12px rgba(0,0,0,0.1);width:90%;max-width:400px;
-  }
-  input,select,button {width:100%;padding:10px;margin:6px 0;border-radius:8px;border:1px solid #ccc;}
-  button {background:#3b82f6;color:white;border:none;cursor:pointer;}
-  button:hover {background:#2563eb;}
-</style>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>登录 - Emovibe</title>
+  <link rel="stylesheet" href="style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
-<h1>💙 Emovibe 陪聊平台注册</h1>
-<div class="box">
-  <input id="email" placeholder="邮箱">
-  <input id="password" type="password" placeholder="密码">
-  <input id="nickname" placeholder="昵称">
-  <select id="role">
-    <option value="client">我是客户</option>
-    <option value="listener">我是陪聊师</option>
-  </select>
-  <select id="gender">
-    <option value="male">男</option>
-    <option value="female">女</option>
-  </select>
-  <select id="personality">
-    <option value="温柔">温柔</option>
-    <option value="安静">安静</option>
-    <option value="治愈">治愈</option>
-    <option value="活泼">活泼</option>
-  </select>
-  <button id="register">注册账号</button>
-</div>
+  <div class="form-container">
+    <h2>登录 Emovibe</h2>
+    <form id="login-form">
+      <input type="email" id="email" placeholder="邮箱" required />
+      <input type="password" id="password" placeholder="密码" required />
+      <button type="submit">登录</button>
+    </form>
+    <p>还没有账号？ <a href="register.html">立即注册</a></p>
+  </div>
 
-<script>
-const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
-const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+  <script>
+    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
+    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
-document.getElementById("register").addEventListener("click", async () => {
-  const email = email.value.trim();
-  const password = password.value.trim();
-  const nickname = nickname.value.trim();
-  const role = role.value;
-  const gender = gender.value;
-  const personality = personality.value;
-
-  if (!email || !password || !nickname) {
-    alert("请填写完整信息");
-    return;
-  }
-
-  const { error } = await supabase.from("users").insert([
-    { email, password, nickname, role, gender, personality, status: "online" }
-  ]);
-
-  if (error) {
-    console.error(error);
-    alert("注册失败：" + error.message);
-  } else {
-    alert("注册成功！");
-    window.location.href = "dashboard.html";
-  }
-});
-</script>
+    document.getElementById("login-form").addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = document.getElementById("email").value;
+      const password = document.getElementById("password").value;
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+      if (error) return alert("登录失败：" + error.message);
+      alert("登录成功！");
+      window.location.href = "dashboard.html";
+    });
+  </script>
 </body>
 </html>
