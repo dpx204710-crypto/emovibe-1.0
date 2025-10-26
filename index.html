@@ -1,28 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-<meta charset="UTF-8">
-<title>Emovibe 登录</title>
-<link rel="stylesheet" href="style.css">
-<script type="module" src="app.js"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emovibe 陪聊平台</title>
+  <link rel="stylesheet" href="style.css" />
 </head>
 <body>
-<div class="container">
-  <h1>Emovibe</h1>
-  <input id="email" placeholder="邮箱">
-  <input id="password" type="password" placeholder="密码">
-  <select id="role">
-    <option value="client">我是客户</option>
-    <option value="companion">我是陪聊师</option>
-  </select>
-  <button id="loginBtn">登录</button>
-  <button id="registerBtn">注册</button>
-</div>
+  <header>
+    <h1>💙 Emovibe 陪聊平台</h1>
+    <nav>
+      <a href="login.html">登录</a>
+      <a href="register.html">注册</a>
+    </nav>
+  </header>
 
-<script type="module">
-import { login, register } from './app.js'
-document.getElementById('loginBtn').onclick = () => login(email.value, password.value)
-document.getElementById('registerBtn').onclick = () => register(email.value, password.value, '用户', '未知', role.value)
-</script>
+  <main>
+    <section class="intro">
+      <h2>让情绪有处安放，让倾听变得温柔</h2>
+      <p>Emovibe 是一个温暖的线上陪聊社区，您可以选择不同性格的陪聊师，体验一对一聊天与情感陪伴。</p>
+      <a href="register.html" class="btn">开始体验</a>
+    </section>
+  </main>
+
+  <footer>
+    <p>© 2025 Emovibe | 情感陪聊平台</p>
+  </footer>
 </body>
 </html>
