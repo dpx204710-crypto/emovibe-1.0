@@ -1,1 +1,37 @@
+body {
+  font-family: 'Inter', sans-serif;
+  margin: 0;
+  background-color: #f5f9ff;
+  color: #222;
+}
 
+button {
+  background: #0070f3;
+  color: white;
+  border: none;
+  padding: 10px 16px;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #0058c1;
+}
+
+input, select, textarea {
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  padding: 8px 10px;
+  width: 100%;
+  margin-bottom: 12px;
+}
+
+.container {
+  max-width: 800px;
+  margin: 40px auto;
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
