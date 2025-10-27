@@ -1,30 +1,104 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emovibe 陪聊平台</title>
-  <link rel="stylesheet" href="style.css" />
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emovibe 一键版</title>
+<style>
+  body { font-family: 'Arial', sans-serif; background: #fff8e1; color: #5a4636; text-align: center; padding: 20px; }
+  h1 { color: #f7b500; }
+  .box { background: #fff3cd; border-radius: 10px; padding: 20px; margin: 20px auto; width: 90%; max-width: 400px; box-shadow: 0 2px 6px rgba(0,0,0,0.1); }
+  button { background: #f7b500; color: white; border: none; border-radius: 5px; padding: 10px 20px; cursor: pointer; margin: 5px; }
+  input, textarea, select { width: 90%; padding: 8px; margin: 8px 0; border-radius: 5px; border: 1px solid #ddd; }
+  .hidden { display: none; }
+  #ordersList div { border-bottom: 1px solid #eee; padding: 5px; }
+</style>
 </head>
 <body>
-  <header>
-    <h1>💙 Emovibe 陪聊平台</h1>
-    <nav>
-      <a href="login.html">登录</a>
-      <a href="register.html">注册</a>
-    </nav>
-  </header>
 
-  <main>
-    <section class="intro">
-      <h2>让情绪有处安放，让倾听变得温柔</h2>
-      <p>Emovibe 是一个温暖的线上陪聊社区，您可以选择不同性格的陪聊师，体验一对一聊天与情感陪伴。</p>
-      <a href="register.html" class="btn">开始体验</a>
-    </section>
-  </main>
+<h1>💛 Emovibe 陪聊平台</h1>
 
-  <footer>
-    <p>© 2025 Emovibe | 情感陪聊平台</p>
-  </footer>
-</body>
-</html>
+<!-- 登录界面 -->
+<div class="box" id="loginBox">
+  <h3>登录 / 注册</h3>
+  <input id="email" placeholder="邮箱"><br>
+  <input id="password" type="password" placeholder="密码"><br>
+  <select id="role">
+    <option value="client">客户</option>
+    <option value="listener">陪聊师</option>
+  </select><br>
+  <button onclick="login()">进入</button>
+</div>
+
+<!-- 客户下单 -->
+<div class="box hidden" id="orderBox">
+  <h3>下单（选择服务）</h3>
+  <select id="service">
+    <option value="倾听">倾听</option>
+    <option value="陪伴">陪伴</option>
+    <option value="开导">开导</option>
+  </select><br>
+  <textarea id="desc" placeholder="描述你的需求..."></textarea><br>
+  <button onclick="createOrder()">提交订单</button>
+</div>
+
+<!-- 陪聊师接单 -->
+<div class="box hidden" id="listenerBox">
+  <h3>等待接单的客户</h3>
+  <div id="ordersList"></div>
+</div>
+
+<!-- 聊天界面 -->
+<div class="box hidden" id="chatBox">
+  <h3>一对一聊天</h3>
+  <div id="messages" style="height:150px; overflow:auto; background:#fff; border-radius:5px; padding:5px;"></div>
+  <input id="msg" placeholder="输入消息..."><button onclick="sendMsg()">发送</button>
+</div>
+
+<script type="module">
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+
+const supabase = createClient(
+  'https://lryfufidcxnxdzglbzgq.supabase.co',
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU'
+)
+
+let currentUser = null
+let currentRole = null
+let currentOrderId = null
+
+async function login() {
+  const emailVal = email.value
+  const passVal = password.value
+  const roleVal = role.value
+  let { data, error } = await supabase.auth.signInWithPassword({ email: emailVal, password: passVal })
+  if (error) {
+    const signUp = await supabase.auth.signUp({ email: emailVal, password: passVal })
+    if (!signUp.error) alert('注册成功！请再次点击登录')
+    return
+  }
+  currentUser = data.user
+  currentRole = roleVal
+  loginBox.classList.add('hidden')
+  if (roleVal === 'client') orderBox.classList.remove('hidden')
+  else if (roleVal === 'listener') {
+    listenerBox.classList.remove('hidden')
+    loadOrders()
+  }
+}
+
+async function createOrder() {
+  const { error } = await supabase.from('orders').insert([
+    { service: service.value, desc: desc.value, status: '待接单', client_id: currentUser.id }
+  ])
+  if (!error) {
+    alert('下单成功，等待陪聊师接单！')
+    orderBox.classList.add('hidden')
+  }
+}
+
+async function loadOrders() {
+  const { data } = await supabase.from('orders').select('*').eq('status', '待接单')
+  const list = document.getElementById('ordersList')
+  list.innerHTML = ''
+  data
