@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <title>客户下单 - Emovibe</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script type="module">
+    import { supabase } from './assets/supabase.js';
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const form = document.getElementById('orderForm');
+      form.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const { data: user } = await supabase.auth.getUser();
+        if (!user.user) return alert("请先登录");
+
+        const details = {
+          user_id: user.user.id,
+          preference: e.target.preference.value,
+          gender: e.target.gender.value,
+          mode: e.target.mode.value,
+          type: e.target.type.value,
+          note: e.target.note.value
+        };
+
+        const { error } = await supabase.from('orders').insert(details);
+        if (error) alert("提交失败：" + error.message);
+        else alert("下单成功！等待陪聊师接单 💛");
+      });
+    });
+  </script>
+</head>
+<body>
+  <header>
+    <h1>客户下单</h1>
+    <a href="index.html"><button>返回首页</button></a>
+  </header>
+
+  <main>
+    <div class="card">
+      <form id="orderForm">
+        <h3>填写需求 💬</h3>
+
+        <label>希望陪聊师性格：</label>
+        <input type="text" name="preference" placeholder="温柔 / 幽默 / 理性..." />
+
+        <label>陪聊师性别：</label>
+        <select name="gender">
+          <option value="不限">不限</option>
+          <option value="男">男</option>
+          <option value="女">女</option>
+        </select>
+
+        <label>聊天方式：</label>
+        <select name="mode">
+          <option value="站内聊天">站内聊天</option>
+          <option value="留下联系方式">留下联系方式</option>
+        </select>
+
+        <label>服务类型：</label>
+        <select name="type">
+          <option value="倾听">倾听</option>
+          <option value="陪伴">陪伴</option>
+          <option value="开导">开导</option>
+        </select>
+
+        <label>备注：</label>
+        <textarea name="note" placeholder="可以写你此刻的情绪或期望" rows="3"></textarea>
+
+        <button type="submit" class="primary">提交订单</button>
+      </form>
+    </div>
+  </main>
+</body>
+</html>
