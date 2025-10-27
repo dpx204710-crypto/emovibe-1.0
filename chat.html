@@ -1,53 +1,52 @@
-<!-- chat.html -->
-<!doctype html>
-<html lang="zh-CN">
+<!DOCTYPE html>
+<html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Emovibe 聊天 — 一对一陪聊</title>
-  <link rel="stylesheet" href="/assets/style.css" />
-  <style>
-    /* 简洁样式，放到 style.css 更好，临时内联保证能直接运行 */
-    body{font-family:system-ui, -apple-system, "Microsoft YaHei", sans-serif;background:#f2f8fb;color:#123;}
-    .container{max-width:760px;margin:20px auto;padding:12px}
-    header{background:#4fa1d6;padding:24px;border-radius:8px;color:#fff;text-align:center}
-    #chatWindow{min-height:300px;background:#fff;border-radius:8px;padding:12px;margin-top:12px;overflow:auto;border:1px solid #e2eef7}
-    .msg{margin:8px 0;padding:10px;border-radius:8px;max-width:80%}
-    .msg.user{background:#dff0ff;margin-left:auto}
-    .msg.companion{background:#f4f6fa}
-    #inputBar{display:flex;gap:8px;margin-top:12px}
-    #text{flex:1;padding:10px;border-radius:8px;border:1px solid #cbdbea}
-    button{background:#f3b63c;border:none;padding:10px 14px;border-radius:8px;color:#fff;cursor:pointer}
-    .list-container{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
-    .listener-card{padding:10px;border-radius:8px;background:#fff;border:1px solid #e6f2fb;cursor:pointer}
-  </style>
+  <meta charset="UTF-8">
+  <title>聊天中 - Emovibe</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script type="module">
+    import { supabase } from './assets/supabase.js';
+
+    const chatBox = document.getElementById('chatBox');
+    const form = document.getElementById('chatForm');
+
+    async function loadMessages() {
+      const { data, error } = await supabase.from('messages').select('*').order('created_at');
+      if (error) return alert(error.message);
+      chatBox.innerHTML = data.map(m => `
+        <p><b>${m.sender}</b>：${m.content}</p>
+      `).join('');
+    }
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const msg = e.target.message.value;
+      if (!msg) return;
+      const { data: user } = await supabase.auth.getUser();
+      await supabase.from('messages').insert({
+        sender: user.user.email,
+        content: msg
+      });
+      e.target.reset();
+      loadMessages();
+    });
+
+    loadMessages();
+  </script>
 </head>
 <body>
-  <div class="container">
-    <header>
-      <h1>Emovibe 聊天 / One-on-One</h1>
-      <p>请选择陪聊师并下单 — 陪聊师接单后开始一对一聊天</p>
-    </header>
+  <header>
+    <h1>一对一聊天</h1>
+    <a href="index.html"><button>退出</button></a>
+  </header>
 
-    <div id="userInfo" style="margin-top:12px"></div>
+  <main>
+    <div id="chatBox" class="card" style="height:300px; overflow-y:auto; text-align:left;"></div>
 
-    <!-- 陪聊师列表（客户可以从中选一个发起请求） -->
-    <section>
-      <h3>在线陪聊师</h3>
-      <div id="listeners" class="list-container">加载中…</div>
-    </section>
-
-    <!-- 当前会话区域 -->
-    <section id="sessionArea" style="display:none;">
-      <h3 id="sessionTitle">会话</h3>
-      <div id="chatWindow"></div>
-      <div id="inputBar">
-        <input id="text" placeholder="说点什么吧..." />
-        <button id="sendBtn">发送</button>
-      </div>
-    </section>
-  </div>
-
-  <script type="module" src="/chat.js"></script>
+    <form id="chatForm" style="margin-top:10px;">
+      <input name="message" placeholder="输入消息..." required />
+      <button type="submit" class="primary">发送</button>
+    </form>
+  </main>
 </body>
 </html>
