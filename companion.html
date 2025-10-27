@@ -1,55 +1,46 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-<meta charset="UTF-8">
-<title>陪聊师接单 - Emovibe</title>
-<link rel="stylesheet" href="style.css">
-<script type="module" src="app.js"></script>
+  <meta charset="UTF-8">
+  <title>陪聊师接单 - Emovibe</title>
+  <link rel="stylesheet" href="./assets/style.css" />
+  <script type="module">
+    import { supabase } from './assets/supabase.js';
+
+    document.addEventListener('DOMContentLoaded', async () => {
+      const list = document.getElementById('orders');
+      const { data, error } = await supabase.from('orders').select('*').order('id', { ascending: false });
+      if (error) return alert("加载失败：" + error.message);
+
+      list.innerHTML = data.map(o => `
+        <div class="card">
+          <h3>${o.type} · ${o.gender}</h3>
+          <p>性格偏好：${o.preference}</p>
+          <p>聊天方式：${o.mode}</p>
+          <p>备注：${o.note || '无'}</p>
+          <button class="primary" onclick="acceptOrder(${o.id})">接单</button>
+        </div>
+      `).join('');
+    });
+
+    window.acceptOrder = async (id) => {
+      const { data: user } = await supabase.auth.getUser();
+      if (!user.user) return alert("请先登录");
+      const { error } = await supabase.from('orders').update({ companion_id: user.user.id }).eq('id', id);
+      if (error) alert("接单失败：" + error.message);
+      else alert("接单成功 💛");
+    };
+  </script>
 </head>
 <body>
-<div class="container">
-  <h1>接单中心</h1>
-  <p>查看等待接单的客户</p>
-  <div id="orders"></div>
-  <button id="refreshBtn">刷新订单</button>
-  <button id="logoutBtn">退出登录</button>
-</div>
+  <header>
+    <h1>陪聊师接单</h1>
+    <a href="index.html"><button>返回首页</button></a>
+  </header>
 
-<script type="module">
-import { supabase, getPendingRequests, acceptRequest } from './app.js'
-
-async function loadOrders() {
-  const data = await getPendingRequests()
-  const container = document.getElementById('orders')
-  container.innerHTML = ''
-  if (!data || data.length === 0) {
-    container.innerHTML = '<p>暂无等待接单的客户</p>'
-    return
-  }
-  data.forEach(req => {
-    const div = document.createElement('div')
-    div.innerHTML = `
-      <div style="border:1px solid #ddd; padding:10px; margin:8px; border-radius:6px;">
-        <p>性别偏好：${req.gender_preference}</p>
-        <p>性格偏好：${req.style_preference}</p>
-        <button onclick="accept(${req.id})">接单</button>
-      </div>
-    `
-    container.appendChild(div)
-  })
-}
-
-window.accept = async (id) => {
-  await acceptRequest(id)
-}
-
-document.getElementById('refreshBtn').onclick = loadOrders
-document.getElementById('logoutBtn').onclick = async () => {
-  await supabase.auth.signOut()
-  window.location = 'index.html'
-}
-
-loadOrders()
-</script>
+  <main>
+    <h2>可接的订单 🌻</h2>
+    <div id="orders"></div>
+  </main>
 </body>
 </html>
