@@ -1,30 +1,56 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Emovibe - 温暖陪伴的每一天</title>
-  <link rel="stylesheet" href="assets/style.css" />
+  <meta charset="UTF-8">
+  <title>Emovibe - 陪你度过每个孤单的夜晚</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
 </head>
 <body>
   <header class="navbar">
-    <div class="logo">🌤 Emovibe</div>
+    <div class="logo">💛 Emovibe</div>
     <nav>
-      <a href="login.html" class="btn">登录</a>
-      <a href="register.html" class="btn-outline">注册</a>
+      <a href="login.html" class="btn-outline">登录</a>
+      <a href="register.html" class="btn">注册</a>
     </nav>
   </header>
 
-  <main class="hero">
-    <div class="hero-content">
-      <h1>遇见懂你的人</h1>
-      <p>我们用温暖的文字，陪你度过每一个孤单的瞬间。</p>
-      <a href="order.html" class="start-btn">立即开始</a>
+  <section class="hero">
+    <h1>治愈，从倾听开始</h1>
+    <p>真人陪聊 · 温柔倾听 · 一对一连接</p>
+    <a href="#mentors" class="start-btn">看看陪聊师</a>
+  </section>
+
+  <section id="mentors" class="mentor-list">
+    <div class="mentor-card">
+      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=500" alt="">
+      <h3>小暖 💛</h3>
+      <p>温柔倾听者 · 24岁</p>
+      <a href="chat.html" class="btn">开始聊天</a>
     </div>
-  </main>
+    <div class="mentor-card">
+      <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=500" alt="">
+      <h3>夏天 ☀️</h3>
+      <p>阳光开朗 · 27岁</p>
+      <a href="chat.html" class="btn">开始聊天</a>
+    </div>
+    <div class="mentor-card">
+      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=500" alt="">
+      <h3>言言 🍵</h3>
+      <p>安静陪伴 · 22岁</p>
+      <a href="chat.html" class="btn">开始聊天</a>
+    </div>
+  </section>
+
+  <div class="blind-box">
+    <h2>💫 想试试盲盒模式？</h2>
+    <p>系统将随机为你匹配一位陪聊师</p>
+    <a href="chat.html">开启盲盒</a>
+  </div>
 
   <footer class="footer">
-    <p>© 2025 Emovibe | 用心倾听，用情陪伴</p>
+    © 2025 Emovibe | 陪伴·倾听·理解
   </footer>
 </body>
 </html>
