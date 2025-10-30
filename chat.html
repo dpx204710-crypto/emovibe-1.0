@@ -1,52 +1,63 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
-  <meta charset="UTF-8">
-  <title>聊天中 - Emovibe</title>
-  <link rel="stylesheet" href="./assets/style.css" />
-  <script type="module">
-    import { supabase } from './assets/supabase.js';
-
-    const chatBox = document.getElementById('chatBox');
-    const form = document.getElementById('chatForm');
-
-    async function loadMessages() {
-      const { data, error } = await supabase.from('messages').select('*').order('created_at');
-      if (error) return alert(error.message);
-      chatBox.innerHTML = data.map(m => `
-        <p><b>${m.sender}</b>：${m.content}</p>
-      `).join('');
-    }
-
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const msg = e.target.message.value;
-      if (!msg) return;
-      const { data: user } = await supabase.auth.getUser();
-      await supabase.from('messages').insert({
-        sender: user.user.email,
-        content: msg
-      });
-      e.target.reset();
-      loadMessages();
-    });
-
-    loadMessages();
-  </script>
+  <meta charset="utf-8" />
+  <title>聊天 - Emovibe</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
 </head>
 <body>
-  <header>
-    <h1>一对一聊天</h1>
-    <a href="index.html"><button>退出</button></a>
+  <header class="navbar">
+    <div class="logo">💛 Emovibe</div>
+    <nav><a href="index.html" class="btn-outline">退出</a></nav>
   </header>
 
-  <main>
-    <div id="chatBox" class="card" style="height:300px; overflow-y:auto; text-align:left;"></div>
+  <div class="chat-box">
+    <div id="messages" class="messages"></div>
+    <div class="input-area">
+      <input id="msgInput" placeholder="输入消息..." />
+      <button id="sendBtn">发送</button>
+    </div>
+  </div>
 
-    <form id="chatForm" style="margin-top:10px;">
-      <input name="message" placeholder="输入消息..." required />
-      <button type="submit" class="primary">发送</button>
-    </form>
-  </main>
+  <script>
+    const client = window.supabase.createClient("https://lryfufidcxnxdzglbzgq.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU");
+
+    const messagesEl = document.getElementById('messages');
+    const input = document.getElementById('msgInput');
+
+    // 简易：读所有 messages 表（请确保 messages 表存在）
+    async function load() {
+      const { data } = await client.from('messages').select('*').order('created_at');
+      messagesEl.innerHTML = (data || []).map(m => {
+        const cls = m.sender === 'system' ? 'message.other' : 'message.other';
+        return `<div class="message other"><b>${m.sender || '用户'}</b><br>${m.content}</div>`;
+      }).join('');
+      messagesEl.scrollTop = messagesEl.scrollHeight;
+    }
+
+    load();
+
+    // 发送消息（插到 messages 表）
+    document.getElementById('sendBtn').addEventListener('click', async () => {
+      const text = input.value.trim();
+      if (!text) return;
+      // 获取当前登录用户 email（简化）
+      const { data } = await client.auth.getUser();
+      const sender = data?.user?.email || '匿名';
+      await client.from('messages').insert([{ sender, content: text }]);
+      input.value = '';
+      load();
+    });
+
+    // 订阅新增消息（Realtime）
+    const channel = client.channel('public:messages');
+    channel.on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
+      load();
+    });
+    channel.subscribe();
+  </script>
 </body>
 </html>
