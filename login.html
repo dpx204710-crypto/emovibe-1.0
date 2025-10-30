@@ -1,36 +1,38 @@
 <!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta charset="utf-8" />
   <title>登录 - Emovibe</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <link rel="stylesheet" href="assets/style.css" />
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="supabase.js"></script>
 </head>
 <body>
   <div class="form-container">
-    <h2>登录 Emovibe</h2>
-    <form id="login-form">
-      <input type="email" id="email" placeholder="邮箱" required />
-      <input type="password" id="password" placeholder="密码" required />
-      <button type="submit">登录</button>
-    </form>
-    <p>还没有账号？ <a href="register.html">立即注册</a></p>
+    <h2>登录你的账号</h2>
+    <input id="email" type="email" placeholder="邮箱" />
+    <input id="password" type="password" placeholder="密码" />
+    <button class="submit-btn" id="loginBtn">登录</button>
+    <p style="margin-top:10px;">还没有账号？ <a href="register.html">注册</a></p>
   </div>
 
   <script>
-    const SUPABASE_URL = "https://lryfufidcxnxdzglbzgq.supabase.co";
-    const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU";
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    const client = window.supabase.createClient("https://lryfufidcxnxdzglbzgq.supabase.co","eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImxyeWZ1ZmlkY3hueGR6Z2xiemdxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjEwMjkzNzQsImV4cCI6MjA3NjYwNTM3NH0.2EeB26Ga2F2o9doXEhUORBB9k2YZniH-LQvZ5BZSBeU");
 
-    document.getElementById("login-form").addEventListener("submit", async (e) => {
-      e.preventDefault();
-      const email = document.getElementById("email").value;
-      const password = document.getElementById("password").value;
-      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-      if (error) return alert("登录失败：" + error.message);
-      alert("登录成功！");
-      window.location.href = "dashboard.html";
+    document.getElementById('loginBtn').addEventListener('click', async () => {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const { data, error } = await client.auth.signInWithPassword({ email, password });
+      if (error) {
+        // 若登录失败尝试注册（简单体验）
+        const { data: s, error: se } = await client.auth.signUp({ email, password });
+        if (se) return alert("登录/注册失败：" + se.message);
+        alert("注册成功，请再次登录（或已发确认邮件）");
+      } else {
+        alert("登录成功");
+        window.location.href = "chat.html";
+      }
     });
   </script>
 </body>
