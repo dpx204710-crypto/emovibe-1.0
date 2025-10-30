@@ -155,3 +155,89 @@ footer {
   color: #a1887f;
   font-size: 0.9rem;
 }
+body {
+  margin: 0;
+  font-family: 'Nunito', 'Microsoft YaHei', sans-serif;
+  background: linear-gradient(180deg, #fff9e6, #ffe0b2);
+  color: #5a4a42;
+}
+
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 15px 40px;
+  background: #fff7d6;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.logo {
+  font-size: 22px;
+  font-weight: bold;
+  color: #e6a03d;
+}
+
+.btn, .btn-outline {
+  margin-left: 15px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.btn {
+  background: #e6a03d;
+  color: white;
+}
+
+.btn:hover {
+  background: #d48f2b;
+}
+
+.btn-outline {
+  border: 2px solid #e6a03d;
+  color: #e6a03d;
+}
+
+.btn-outline:hover {
+  background: #e6a03d;
+  color: white;
+}
+
+.hero {
+  text-align: center;
+  padding: 120px 20px;
+}
+
+.hero h1 {
+  font-size: 48px;
+  color: #d48f2b;
+  margin-bottom: 20px;
+}
+
+.hero p {
+  font-size: 20px;
+  color: #6f5d52;
+  margin-bottom: 40px;
+}
+
+.start-btn {
+  background: #e6a03d;
+  color: white;
+  padding: 12px 28px;
+  border-radius: 10px;
+  text-decoration: none;
+  font-size: 18px;
+}
+
+.start-btn:hover {
+  background: #d48f2b;
+}
+
+.footer {
+  text-align: center;
+  padding: 20px;
+  background: #fff7d6;
+  color: #8c7a6b;
+  font-size: 14px;
+}
