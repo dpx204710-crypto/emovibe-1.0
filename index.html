@@ -1,36 +1,30 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
-  <title>Emovibe - 陪伴你的每一天</title>
-  <link rel="stylesheet" href="./assets/style.css" />
-  <script type="module" src="./assets/ui.js"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Emovibe - 温暖陪伴的每一天</title>
+  <link rel="stylesheet" href="assets/style.css" />
 </head>
 <body>
-  <header>
-    <h1>Emovibe</h1>
-    <button id="loginBtn">登录</button>
+  <header class="navbar">
+    <div class="logo">🌤 Emovibe</div>
+    <nav>
+      <a href="login.html" class="btn">登录</a>
+      <a href="register.html" class="btn-outline">注册</a>
+    </nav>
   </header>
 
-  <main>
-    <h2>温暖陪伴，从一次倾听开始 💛</h2>
-    <div class="card">
-      <p>想找人聊聊吗？点击下方按钮快速开始！</p>
-      <a href="order.html"><button class="primary">客户下单</button></a>
-    </div>
-    <div class="card">
-      <p>成为陪聊师，用温柔陪伴他人 🌼</p>
-      <a href="companion.html"><button class="primary">陪聊师接单</button></a>
+  <main class="hero">
+    <div class="hero-content">
+      <h1>遇见懂你的人</h1>
+      <p>我们用温暖的文字，陪你度过每一个孤单的瞬间。</p>
+      <a href="order.html" class="start-btn">立即开始</a>
     </div>
   </main>
 
-  <div id="loginModal">
-    <h3>登录账户</h3>
-    <form id="loginForm">
-      <input type="email" name="email" placeholder="邮箱" required />
-      <input type="password" name="password" placeholder="密码" required />
-      <button type="submit" class="primary">登录</button>
-    </form>
-  </div>
+  <footer class="footer">
+    <p>© 2025 Emovibe | 用心倾听，用情陪伴</p>
+  </footer>
 </body>
 </html>
