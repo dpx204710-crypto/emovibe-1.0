@@ -1,57 +1,40 @@
 <!DOCTYPE html>
-<html lang="zh-CN">
+<html lang="zh">
 <head>
-  <meta charset="utf-8" />
-  <title>Emovibe - 陪伴温暖每一刻</title>
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <link rel="stylesheet" href="assets/style.css" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EmoVibe - 温暖陪聊</title>
+  <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="supabase.js"></script>
 </head>
 <body>
-  <header class="navbar">
-    <div class="logo">💛 Emovibe</div>
+  <header>
+    <div class="logo">💛 EmoVibe</div>
     <nav>
-      <a href="login.html" class="btn-outline">登录</a>
-      <a href="register.html" class="btn">注册</a>
+      <a href="#">首页</a>
+      <a href="login.html">登录</a>
     </nav>
   </header>
 
   <section class="hero">
-    <h1>治愈，从倾听开始</h1>
-    <p>真人陪聊 · 温柔倾听 · 一对一连接</p>
-    <a class="start-btn" href="#mentors">看看陪聊师</a>
-  </section>
-
-  <section id="mentors" class="mentor-list">
-    <div class="mentor-card">
-      <img src="https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=800&q=80" alt="mentor">
-      <h3>小暖 · 24岁</h3>
-      <p>温柔倾听 · 安静陪伴</p>
-      <a class="btn" href="chat.html?mentor=1">开始聊天</a>
-    </div>
-
-    <div class="mentor-card">
-      <img src="https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=800&q=80" alt="mentor">
-      <h3>夏天 · 27岁</h3>
-      <p>阳光开朗 · 能量满满</p>
-      <a class="btn" href="chat.html?mentor=2">开始聊天</a>
-    </div>
-
-    <div class="mentor-card">
-      <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=800&q=80" alt="mentor">
-      <h3>言言 · 22岁</h3>
-      <p>安静陪伴 · 深度倾听</p>
-      <a class="btn" href="chat.html?mentor=3">开始聊天</a>
+    <h1>遇见温暖的灵魂</h1>
+    <p>选择陪聊师，或开启盲盒，找到你的倾听者 💬</p>
+    <div class="hero-buttons">
+      <button id="openBlindBox">🎁 开启盲盒</button>
+      <button onclick="location.href='#list'">👥 查看陪聊师</button>
     </div>
   </section>
 
-  <div class="blind-box">
-    <h2>💫 盲盒匹配</h2>
-    <p>随机为你匹配一位在线陪聊师</p>
-    <a href="chat.html?blind=1">开启盲盒</a>
-  </div>
+  <section id="list" class="companions">
+    <h2>我们的陪聊师</h2>
+    <div id="companionsContainer" class="grid"></div>
+  </section>
 
-  <footer class="footer">© 2025 Emovibe · 陪伴·倾听·理解</footer>
+  <footer>
+    <p>© 2025 EmoVibe | 温暖陪伴，用心倾听</p>
+  </footer>
+
+  <script src="supabaseClient.js"></script>
+  <script src="main.js"></script>
 </body>
 </html>
