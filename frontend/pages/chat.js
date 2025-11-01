@@ -1,65 +1,60 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EmoVibe 聊天室</title>
-    <style>
-        body { font-family: 'Roboto', sans-serif; background: #f5faff; margin:0; }
-        header { background: #007bff; color: white; padding: 15px 30px; text-align:center; }
-        #chat-container { max-width: 800px; margin: 30px auto; background: white; border-radius: 12px; padding: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.1);}
-        #messages { height: 400px; overflow-y: auto; border: 1px solid #ccc; padding: 10px; border-radius: 8px; margin-bottom: 15px; background:#e6f0ff;}
-        .message { margin-bottom: 10px; }
-        #input-container { display: flex; gap: 10px; }
-        #input-container input { flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; }
-        #input-container button { padding:10px 20px; border:none; border-radius:8px; background:#007bff; color:white; cursor:pointer; }
-    </style>
-</head>
-<body>
-    <header>
-        <h1>EmoVibe 聊天室</h1>
-    </header>
+// frontend/pages/index.js
+import Link from 'next/link';
 
-    <div id="chat-container">
-        <div id="messages"></div>
-        <div id="input-container">
-            <input type="text" id="message-input" placeholder="输入消息...">
-            <button onclick="sendMessage()">发送</button>
+export default function Home() {
+  return (
+    <div style={{ fontFamily: 'Roboto, sans-serif', backgroundColor: '#f5faff', color: '#333' }}>
+      <header style={{ backgroundColor: '#007bff', color: 'white', padding: '20px 40px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <div style={{ fontSize: '28px', fontWeight: 700 }}>EmoVibe</div>
+        <nav>
+          <Link href="/chat" style={{ color: 'white', marginLeft: '20px', textDecoration: 'none', fontWeight: 500 }}>聊天室</Link>
+          <Link href="/ai" style={{ color: 'white', marginLeft: '20px', textDecoration: 'none', fontWeight: 500 }}>AI自定义角色</Link>
+          <Link href="/membership" style={{ color: 'white', marginLeft: '20px', textDecoration: 'none', fontWeight: 500 }}>充值会员</Link>
+          <Link href="/contact" style={{ color: 'white', marginLeft: '20px', textDecoration: 'none', fontWeight: 500 }}>联系我们</Link>
+        </nav>
+      </header>
+
+      <section style={{
+        display: 'flex', flexDirection: 'column', alignItems: 'center',
+        justifyContent: 'center', height: '80vh', textAlign: 'center',
+        background: 'linear-gradient(135deg, #e0f0ff, #cce5ff)'
+      }}>
+        <h1 style={{ fontSize: '48px', marginBottom: '20px', color: '#007bff' }}>专业情感陪聊平台</h1>
+        <p style={{ fontSize: '20px', marginBottom: '30px', maxWidth: '600px' }}>
+          与真人或AI陪聊，分享你的心情，结识温暖的人。立即加入会员，享受专属陪聊体验。
+        </p>
+        <div>
+          <Link href="/membership">
+            <button style={{ padding: '15px 30px', fontSize: '18px', margin: '5px', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: '#007bff', color: 'white' }}>
+              开通会员 $99/周
+            </button>
+          </Link>
+          <Link href="/ai">
+            <button style={{ padding: '15px 30px', fontSize: '18px', margin: '5px', border: 'none', borderRadius: '6px', cursor: 'pointer', backgroundColor: '#00c8ff', color: 'white' }}>
+              AI自定义角色
+            </button>
+          </Link>
         </div>
+      </section>
+
+      <section style={{ display: 'flex', justifyContent: 'center', gap: '40px', padding: '60px 20px', flexWrap: 'wrap' }}>
+        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '250px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+          <h3 style={{ marginBottom: '15px', color: '#007bff' }}>真人陪聊</h3>
+          <p>专业陪聊师倾听你的心声，给予温暖和建议。</p>
+        </div>
+        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '250px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+          <h3 style={{ marginBottom: '15px', color: '#007bff' }}>AI角色陪聊</h3>
+          <p>自定义AI陪聊角色，随时随地获得个性化陪伴。</p>
+        </div>
+        <div style={{ backgroundColor: 'white', padding: '30px', borderRadius: '12px', width: '250px', boxShadow: '0 4px 10px rgba(0,0,0,0.1)', textAlign: 'center' }}>
+          <h3 style={{ marginBottom: '15px', color: '#007bff' }}>社交分享</h3>
+          <p>可选择分享你的社交账号，轻松建立连接与朋友。</p>
+        </div>
+      </section>
+
+      <footer style={{ textAlign: 'center', padding: '20px', backgroundColor: '#e0f0ff', marginTop: '40px' }}>
+        &copy; 2025 EmoVibe. All Rights Reserved.
+      </footer>
     </div>
-
-    <script type="module">
-        import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm'
-
-        // 用你的 Supabase 信息替换下面
-        const supabaseUrl = 'YOUR_SUPABASE_URL'
-        const supabaseKey = 'YOUR_SUPABASE_ANON_KEY'
-        const supabase = createClient(supabaseUrl, supabaseKey)
-
-        const messagesDiv = document.getElementById('messages')
-
-        // 订阅消息
-        supabase
-            .channel('public:messages')
-            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'messages' }, payload => {
-                const msg = payload.new
-                const div = document.createElement('div')
-                div.className = 'message'
-                div.textContent = `${msg.user}: ${msg.content}`
-                messagesDiv.appendChild(div)
-                messagesDiv.scrollTop = messagesDiv.scrollHeight
-            })
-            .subscribe()
-
-        async function sendMessage() {
-            const input = document.getElementById('message-input')
-            const content = input.value
-            if (!content) return
-
-            // 假设用户名字是 Guest（可以根据登录修改）
-            await supabase.from('messages').insert([{ user: 'Guest', content }])
-            input.value = ''
-        }
-    </script>
-</body>
-</html>
+  );
+}
