@@ -1,73 +1,51 @@
-// pages/api/ai-chat.js
-import { createClient } from '@supabase/supabase-js';
-import fetch from 'node-fetch';
-
-const supabase = createClient(process.env.NEXT_PUBLIC_SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
-// NOTE: 使用 service key 在 server 端访问 db（不要公开）
-
-const OPENAI_KEY = process.env.OPENAI_API_KEY;
-const OPENAI_URL = 'https://api.openai.com/v1/chat/completions';
-
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).end();
-  const { conversationId, characterId, userId, message } = req.body;
+  if (req.method !== "POST") {
+    return res.status(405).json({ error: "仅支持 POST 请求" });
+  }
+
+  const { message, character } = req.body;
+  const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+
+  if (!OPENAI_API_KEY) {
+    return res.status(500).json({ error: "服务器缺少 OpenAI 密钥" });
+  }
 
   try {
-    // 1) 获取角色 prompt
-    const { data: charData, error: charErr } = await supabase
-      .from('user_ai_characters')
-      .select('*')
-      .eq('id', characterId)
-      .single();
-    if (charErr) throw charErr;
+    // 生成角色系统提示
+    const systemPrompt = `
+你现在是一名陪聊AI，名叫「${character.name || "小暖"}」。
+你的性格是：${character.personality || "温柔体贴"}。
+你的聊天风格是：${character.style || "像朋友一样"}。
+你的目标是温柔地安慰、倾听、鼓励用户，让对方感到放松和被理解。
+回答要自然、真诚、有温度。
+`;
 
-    // 2) 拉最近的历史消息（ai_messages）
-    const { data: history } = await supabase
-      .from('ai_messages')
-      .select('role, content')
-      .eq('conversation_id', conversationId)
-      .order('created_at', { ascending: true })
-      .limit(30); // 控制上下文长度
-
-    // 3) 构建 messages
-    const systemPrompt = charData.prompt || `You are ${charData.name}, ${charData.personality}.`; // fallback
-    const messages = [
-      { role: 'system', content: systemPrompt },
-      ...history.map(h => ({ role: h.role, content: h.content })),
-      { role: 'user', content: message }
-    ];
-
-    // 4) 请求 OpenAI
-    const resp = await fetch(OPENAI_URL, {
-      method: 'POST',
+    // 向 OpenAI 发送聊天请求
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
       headers: {
-        'Authorization': `Bearer ${OPENAI_KEY}`,
-        'Content-Type': 'application/json'
+        "Authorization": `Bearer ${OPENAI_API_KEY}`,
+        "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: 'gpt-4o-mini', // 或 gpt-4o / gpt-4 等按你权限
-        messages,
-        max_tokens: 800,
-      })
+        model: "gpt-3.5-turbo",
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user", content: message },
+        ],
+      }),
     });
 
-    const data = await resp.json();
+    const data = await response.json();
 
-    const assistantText = data.choices?.[0]?.message?.content || "(无回复)";
+    // 安全取内容
+    const reply =
+      data?.choices?.[0]?.message?.content?.trim() ||
+      "（AI暂时没反应，请稍后重试）";
 
-    // 5) 写入 ai_messages（system/user/alignment）
-    await supabase.from('ai_messages').insert([
-      { conversation_id: conversationId, sender: userId, role: 'user', content: message },
-      { conversation_id: conversationId, sender: 'ai', role: 'assistant', content: assistantText }
-    ]);
-
-    // 6) 解析是否包含记账/转账指令（可在 prompt 里定义约定）
-    // 例如 AI 回复里 meta JSON：{ "action": "record", "amount": 10, "category": "coffee" }
-    // 如果需要解析则在此处理 -> 调用 ledger 添加或/and call transfer API
-
-    res.status(200).json({ reply: assistantText });
+    res.status(200).json({ reply });
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ error: err.message || err });
+    console.error("OpenAI请求失败：", err);
+    res.status(500).json({ error: "服务器处理失败" });
   }
 }
