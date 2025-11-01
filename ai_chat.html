@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <title>AI聊天 - Emovibe</title>
+  <link rel="stylesheet" href="assets/style.css" />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="assets/supabase.js"></script>
+  <style>
+    body {
+      background: #fff7e0;
+      font-family: 'Segoe UI', sans-serif;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: flex-start;
+      height: 100vh;
+      margin: 0;
+    }
+    .chat-box {
+      width: 90%;
+      max-width: 400px;
+      background: white;
+      border-radius: 1rem;
+      padding: 1rem;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      flex-grow: 1;
+      overflow-y: auto;
+      margin-top: 2rem;
+    }
+    .msg {
+      margin: 0.5rem 0;
+      padding: 0.6rem;
+      border-radius: 8px;
+    }
+    .user { background: #ffecb3; text-align: right; }
+    .ai { background: #fff2cc; text-align: left; }
+    .input-box {
+      display: flex;
+      width: 90%;
+      max-width: 400px;
+      margin: 1rem auto;
+    }
+    input {
+      flex-grow: 1;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      padding: 0.5rem;
+    }
+    button {
+      margin-left: 0.5rem;
+      background: #ffc107;
+      border: none;
+      color: white;
+      padding: 0.6rem 1rem;
+      border-radius: 8px;
+    }
+  </style>
+</head>
+<body>
+  <div class="chat-box" id="chatBox"></div>
+  <div class="input-box">
+    <input id="msgInput" placeholder="输入消息..." />
+    <button id="sendBtn">发送</button>
+  </div>
+
+  <script>
+    const urlParams = new URLSearchParams(window.location.search);
+    const convoId = urlParams.get("id");
+
+    async function loadMessages() {
+      const { data } = await supabase
+        .from("ai_messages")
+        .select("*")
+        .eq("conversation_id", convoId)
+        .order("created_at", { ascending: true });
+
+      const chatBox = document.getElementById("chatBox");
+      chatBox.innerHTML = "";
+      data.forEach(msg => {
+        const div = document.createElement("div");
+        div.className = "msg " + (msg.sender === "user" ? "user" : "ai");
+        div.textContent = msg.message;
+        chatBox.appendChild(div);
+      });
+      chatBox.scrollTop = chatBox.scrollHeight;
+    }
+
+    loadMessages();
+
+    document.getElementById("sendBtn").addEventListener("click", async () => {
+      const input = document.getElementById("msgInput");
+      const message = input.value.trim();
+      if (!message) return;
+
+      await supabase.from("ai_messages").insert({
+        conversation_id: convoId,
+        sender: "user",
+        message
+      });
+
+      // AI回复模拟（你后面可以换成真正的AI接口）
+      const reply = "（AI）我听到了哦～：" + message;
+      await supabase.from("ai_messages").insert({
+        conversation_id: convoId,
+        sender: "ai",
+        message: reply
+      });
+
+      input.value = "";
+      loadMessages();
+    });
+  </script>
+</body>
+</html>
