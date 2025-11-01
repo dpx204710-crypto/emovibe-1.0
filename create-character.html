@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>创建你的AI角色</title>
+  <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+  <h2>🎨 创建你的AI角色</h2>
+  <input id="name" placeholder="角色名">
+  <textarea id="personality" placeholder="性格描述"></textarea>
+  <input id="avatar" placeholder="头像URL">
+  <button id="create">创建角色</button>
+
+  <script type="module">
+    import { createAICharacter } from './ai.js'
+    document.getElementById('create').onclick = () => {
+      const name = name.value
+      const personality = personality.value
+      const avatar_url = avatar.value
+      createAICharacter(name, personality, avatar_url)
+    }
+  </script>
+</body>
+</html>
