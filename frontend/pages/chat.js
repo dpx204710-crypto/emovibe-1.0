@@ -1,63 +1,49 @@
-import { useState } from "react";
+import { useState, useEffect } from 'react';
+import axios from 'axios';
 
-export default function ChatPage() {
-  const [roleId, setRoleId] = useState("");
-  const [userId, setUserId] = useState("demo_user");
-  const [message, setMessage] = useState("");
-  const [chat, setChat] = useState([]);
-  const [loading, setLoading] = useState(false);
+export default function Chat() {
+  const [messages,setMessages]=useState([]);
+  const [input,setInput]=useState('');
+  const roleId = 'put-alice-role-id-here';
+  const userId = '29eb0c59-5baf-4417-a71b-1d7a301aec8e';
 
-  const sendMessage = async () => {
-    if (!roleId || !message.trim()) return;
-    setLoading(true);
+  useEffect(()=>{ fetchHistory() },[]);
 
-    const userMsg = { sender: "user", message };
-    setChat([...chat, userMsg]);
+  const fetchHistory = async ()=>{
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/chat-history?roleId=${roleId}&userId=${userId}`);
+    setMessages(res.data.messages);
+  }
 
-    try {
-      const res = await fetch("http://localhost:5000/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ message, roleId, user_id: userId }),
-      });
-      const data = await res.json();
-      const botMsg = { sender: "bot", message: data.reply };
-      setChat((prev) => [...prev, botMsg]);
-    } catch (err) {
-      setChat((prev) => [...prev, { sender: "bot", message: "❌ AI failed to respond." }]);
-    } finally {
-      setMessage("");
-      setLoading(false);
-    }
-  };
+  const handleSend = async ()=>{
+    if(!input) return;
+    const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {message:input, roleId, user_id:userId});
+    setMessages([...messages,{sender:'user',message:input},{sender:'ai',message:res.data.reply}]);
+    setInput('');
+  }
 
   return (
-    <div style={{ maxWidth: 600, margin: "60px auto", fontFamily: "Arial" }}>
-      <h1>Chat with Your AI</h1>
-      <input
-        placeholder="Enter your AI Role ID"
-        value={roleId}
-        onChange={(e) => setRoleId(e.target.value)}
-        style={{ width: "100%", marginBottom: 10 }}
-      />
-      <div style={{ border: "1px solid #ddd", padding: 10, height: 400, overflowY: "scroll" }}>
-        {chat.map((msg, i) => (
-          <p key={i} style={{ textAlign: msg.sender === "user" ? "right" : "left" }}>
-            <strong>{msg.sender === "user" ? "You" : "AI"}:</strong> {msg.message}
-          </p>
+    <div style={{fontFamily:'Roboto, sans-serif',maxWidth:'600px',margin:'20px auto'}}>
+      <h2 style={{textAlign:'center',color:'#007bff'}}>Chat with AI</h2>
+      <div style={{border:'1px solid #ccc',borderRadius:'10px',padding:'10px',height:'400px',overflowY:'scroll',background:'#f5faff'}}>
+        {messages.map((m,i)=>(
+          <div key={i} style={{textAlign:m.sender==='user'?'right':'left',margin:'10px 0'}}>
+            <div style={{
+              display:'inline-block',
+              padding:'10px 15px',
+              borderRadius:'20px',
+              background:m.sender==='user'?'#007bff':'#e0f0ff',
+              color:m.sender==='user'?'white':'#007bff',
+              maxWidth:'70%'
+            }}>
+              {m.message}
+            </div>
+          </div>
         ))}
       </div>
-      <div style={{ display: "flex", marginTop: 10 }}>
-        <input
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          placeholder="Type your message..."
-          style={{ flex: 1, marginRight: 10 }}
-        />
-        <button onClick={sendMessage} disabled={loading}>
-          {loading ? "..." : "Send"}
-        </button>
+      <div style={{display:'flex',marginTop:'10px'}}>
+        <input value={input} onChange={e=>setInput(e.target.value)} style={{flex:1,padding:'10px',borderRadius:'8px',border:'1px solid #ccc'}} />
+        <button onClick={handleSend} style={{marginLeft:'10px',padding:'10px 20px',borderRadius:'8px',border:'none',background:'#007bff',color:'white',cursor:'pointer'}}>Send</button>
       </div>
     </div>
-  );
+  )
 }
