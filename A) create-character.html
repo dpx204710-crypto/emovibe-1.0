@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html><head>
+<meta charset="utf-8"><title>创建 AI 角色</title>
+<link rel="stylesheet" href="assets/style.css">
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase.js"></script>
+</head><body>
+<div class="form-container">
+  <h2>创建你的 AI 角色</h2>
+  <input id="name" placeholder="角色名" />
+  <select id="gender"><option>女</option><option>男</option><option>中性</option></select>
+  <input id="personality" placeholder="性格（例如：温柔，幽默）" />
+  <input id="style" placeholder="风格（例如：治愈/恋爱/理性）" />
+  <textarea id="desc" placeholder="角色的行为设定（示例：总是先安慰，然后提出建议）"></textarea>
+  <button id="saveBtn" class="submit-btn">保存并开始聊天</button>
+</div>
+
+<script>
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY); // from supabase.js global constants
+
+document.getElementById('saveBtn').addEventListener('click', async () => {
+  const vals = {
+    name: document.getElementById('name').value,
+    gender: document.getElementById('gender').value,
+    personality: document.getElementById('personality').value,
+    style: document.getElementById('style').value,
+    prompt: `你是名为${document.getElementById('name').value}的角色。性格：${document.getElementById('personality').value}。设定：${document.getElementById('desc').value}`
+  };
+  const { data, error } = await client.from('user_ai_characters').insert([vals]).select().single();
+  if (error) return alert('保存失败：' + error.message);
+  // 创建会话并跳转到聊天页
+  const { data: conv } = await client.from('ai_conversations').insert([{ user_id: (await client.auth.getUser()).data.user.id, character_id: data.id }]).select().single();
+  location.href = `ai-chat.html?conversation_id=${conv.id}&character_id=${data.id}`;
+});
+</script>
+</body></html>
