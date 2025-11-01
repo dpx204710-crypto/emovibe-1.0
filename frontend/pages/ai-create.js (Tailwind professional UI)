@@ -1,0 +1,48 @@
+import { useState } from 'react';
+import { useRouter } from 'next/router';
+
+export default function AICreate() {
+  const router = useRouter();
+  const [form, setForm] = useState({ user_id: 'demo_user', name:'', personality:'', catchphrase:'', interests:'', avatar_url:'' });
+  const [loading, setLoading] = useState(false);
+  const [msg, setMsg] = useState('');
+
+  const onChange = e => setForm({...form, [e.target.name]: e.target.value});
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setLoading(true); setMsg('');
+    try {
+      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000'}/api/ai-roles`, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({...form, interests: form.interests ? form.interests.split(',').map(s=>s.trim()):[]})
+      });
+      const data = await res.json();
+      if (data.success) {
+        setMsg('Role created ✅');
+        router.push(`/chat?roleId=${data.roleId}&userId=${form.user_id}`);
+      } else setMsg('Create failed');
+    } catch (err) { setMsg('Server error'); }
+    finally { setLoading(false); }
+  };
+
+  return (
+    <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white flex items-center justify-center p-6">
+      <form onSubmit={submit} className="w-full max-w-lg bg-white rounded-xl shadow-lg p-6 space-y-4">
+        <h2 className="text-2xl font-bold text-blue-600">Create AI Companion</h2>
+        <input name="name" onChange={onChange} placeholder="Name" className="input"/>
+        <input name="personality" onChange={onChange} placeholder="Personality" className="input"/>
+        <input name="catchphrase" onChange={onChange} placeholder="Catchphrase" className="input"/>
+        <input name="interests" onChange={onChange} placeholder="Interests (comma separated)" className="input"/>
+        <input name="avatar_url" onChange={onChange} placeholder="Avatar URL (optional)" className="input"/>
+        <div className="flex items-center gap-3">
+          <button disabled={loading} className="bg-blue-600 text-white px-4 py-2 rounded">{loading?'Creating...':'Create Role'}</button>
+          <p className="text-sm text-gray-500">{msg}</p>
+        </div>
+      </form>
+      <style jsx>{`
+        .input { width:100%; padding:10px; border:1px solid #e5e7eb; border-radius:8px; }
+      `}</style>
+    </div>
+  );
+}
