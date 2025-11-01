@@ -11,10 +11,13 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
+// --------------------
+// Supabase 初始化
+// --------------------
 const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_KEY);
 
 // --------------------
-// Register
+// 注册 API
 // --------------------
 app.post('/register', async (req, res) => {
   const { email, password, name, country, gender } = req.body;
@@ -30,7 +33,7 @@ app.post('/register', async (req, res) => {
 });
 
 // --------------------
-// Login
+// 登录 API
 // --------------------
 app.post('/login', async (req, res) => {
   const { email, password } = req.body;
@@ -44,7 +47,7 @@ app.post('/login', async (req, res) => {
 });
 
 // --------------------
-// Chat
+// 聊天 API
 // --------------------
 app.post('/chat', async (req, res) => {
   const { chat_id, user_id, text, type } = req.body;
@@ -56,7 +59,7 @@ app.post('/chat', async (req, res) => {
 });
 
 // --------------------
-// Tree Hole
+// 树洞 API
 // --------------------
 app.get('/tree_holes', async (req, res) => {
   const { data, error } = await supabase.from('tree_holes').select('*').order('created_at', { ascending: false });
@@ -73,7 +76,7 @@ app.post('/tree_holes', async (req, res) => {
 });
 
 // --------------------
-// Membership
+// 会员 API
 // --------------------
 app.post('/membership', async (req, res) => {
   const { user_id, type, price } = req.body;
@@ -87,4 +90,7 @@ app.post('/membership', async (req, res) => {
   res.json(data[0]);
 });
 
+// --------------------
+// 启动服务器
+// --------------------
 app.listen(process.env.PORT || 3000, ()=>console.log('Backend running on port', process.env.PORT||3000));
