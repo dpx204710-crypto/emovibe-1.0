@@ -1,89 +1,61 @@
-// frontend/pages/chat.js
-import { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/router';
+import { useState } from "react";
 
-export default function Chat() {
-  const router = useRouter();
-  const { roleId } = router.query;
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState('');
+export default function ChatPage() {
+  const [roleId, setRoleId] = useState("");
+  const [userId, setUserId] = useState("demo_user");
+  const [message, setMessage] = useState("");
+  const [chat, setChat] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [role, setRole] = useState(null);
-  const messagesEndRef = useRef(null);
-
-  // 获取角色信息
-  useEffect(() => {
-    if (!roleId) return;
-    const fetchRole = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/ai-roles/${roleId}`);
-        const data = await res.json();
-        setRole(data.role);
-      } catch (err) {
-        console.error('获取角色失败', err);
-      }
-    };
-    fetchRole();
-  }, [roleId]);
-
-  const scrollToBottom = () => messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  useEffect(() => scrollToBottom(), [messages]);
 
   const sendMessage = async () => {
-    if (!input.trim()) return;
-    const userMessage = { sender: 'user', text: input };
-    setMessages(prev => [...prev, userMessage]);
-    setInput('');
+    if (!roleId || !message.trim()) return;
     setLoading(true);
 
+    const userMsg = { sender: "user", message };
+    setChat([...chat, userMsg]);
+
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/chat`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMessage.text, roleId })
+      const res = await fetch("http://localhost:5000/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message, roleId, user_id: userId }),
       });
       const data = await res.json();
-      setMessages(prev => [...prev, { sender: 'bot', text: data.reply }]);
-    } catch (error) {
-      setMessages(prev => [...prev, { sender: 'bot', text: '服务器错误，请稍后重试。' }]);
-      console.error(error);
+      const botMsg = { sender: "bot", message: data.reply };
+      setChat((prev) => [...prev, botMsg]);
+    } catch (err) {
+      setChat((prev) => [...prev, { sender: "bot", message: "❌ AI failed to respond." }]);
     } finally {
+      setMessage("");
       setLoading(false);
     }
   };
 
-  const handleKeyPress = (e) => { if (e.key === 'Enter') sendMessage(); };
-
   return (
-    <div style={{ fontFamily: 'Roboto, sans-serif', padding: '20px', maxWidth: '700px', margin: '0 auto' }}>
-      <h1 style={{ color: '#007bff', textAlign: 'center', marginBottom: '20px' }}>
-        聊天室 - {role ? role.name : '加载角色中...'}
-      </h1>
-
-      <div style={{ border: '1px solid #ccc', borderRadius: '8px', padding: '10px', height: '400px', overflowY: 'auto', marginBottom: '10px', backgroundColor: '#f5faff' }}>
-        {messages.map((msg, idx) => (
-          <div key={idx} style={{ textAlign: msg.sender === 'user' ? 'right' : 'left', margin: '10px 0' }}>
-            <span style={{
-              display: 'inline-block', padding: '8px 12px', borderRadius: '12px',
-              backgroundColor: msg.sender === 'user' ? '#007bff' : '#e0f0ff',
-              color: msg.sender === 'user' ? 'white' : '#007bff'
-            }}>{msg.text}</span>
-          </div>
+    <div style={{ maxWidth: 600, margin: "60px auto", fontFamily: "Arial" }}>
+      <h1>Chat with Your AI</h1>
+      <input
+        placeholder="Enter your AI Role ID"
+        value={roleId}
+        onChange={(e) => setRoleId(e.target.value)}
+        style={{ width: "100%", marginBottom: 10 }}
+      />
+      <div style={{ border: "1px solid #ddd", padding: 10, height: 400, overflowY: "scroll" }}>
+        {chat.map((msg, i) => (
+          <p key={i} style={{ textAlign: msg.sender === "user" ? "right" : "left" }}>
+            <strong>{msg.sender === "user" ? "You" : "AI"}:</strong> {msg.message}
+          </p>
         ))}
-        <div ref={messagesEndRef}></div>
       </div>
-
-      <div style={{ display: 'flex' }}>
+      <div style={{ display: "flex", marginTop: 10 }}>
         <input
-          type="text"
-          value={input}
-          onChange={e => setInput(e.target.value)}
-          onKeyPress={handleKeyPress}
-          placeholder="输入消息..."
-          style={{ flex: 1, padding: '10px', borderRadius: '8px', border: '1px solid #ccc' }}
+          value={message}
+          onChange={(e) => setMessage(e.target.value)}
+          placeholder="Type your message..."
+          style={{ flex: 1, marginRight: 10 }}
         />
-        <button onClick={sendMessage} disabled={loading} style={{ marginLeft: '10px', padding: '10px 20px', borderRadius: '8px', border: 'none', backgroundColor: '#007bff', color: 'white', cursor: 'pointer' }}>
-          {loading ? '发送中...' : '发送'}
+        <button onClick={sendMessage} disabled={loading}>
+          {loading ? "..." : "Send"}
         </button>
       </div>
     </div>
