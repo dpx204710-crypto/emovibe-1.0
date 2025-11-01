@@ -1,23 +1,25 @@
 import { useState } from 'react';
+import { API_BASE_URL } from '../config';
 
 export default function Membership() {
-  const [message,setMessage]=useState('');
+  const [message,setMessage] = useState('');
 
-  const buyWeekly=async()=>{
-    const res=await fetch('http://localhost:3000/membership',{
+  const buyMembership = async (type)=>{
+    const price = type==='weekly'?99:399;
+    const res = await fetch(`${API_BASE_URL}/membership`, {
       method:'POST',
       headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({user_id:'user1',type:'weekly',price:99})
+      body: JSON.stringify({user_id:'user1', type, price})
     });
-    const data=await res.json();
-    setMessage('Weekly membership activated!');
+    const data = await res.json();
+    setMessage(data.id ? `Membership ${type} purchased!` : data.error);
   }
 
   return (
     <div style={{padding:'2rem'}}>
       <h1>Membership</h1>
-      <p>Weekly Membership: $99</p>
-      <button onClick={buyWeekly}>Buy Weekly</button>
+      <button onClick={()=>buyMembership('weekly')}>Weekly $99</button>
+      <button onClick={()=>buyMembership('monthly')}>Monthly $399</button>
       <p>{message}</p>
     </div>
   )
