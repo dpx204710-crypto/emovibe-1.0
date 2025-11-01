@@ -1,40 +1,38 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>EmoVibe - 温暖陪聊</title>
-  <link rel="stylesheet" href="style.css">
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <title>Emovibe - 温暖陪伴的空间</title>
+  <link rel="stylesheet" href="./style.css">
 </head>
 <body>
-  <header>
-    <div class="logo">💛 EmoVibe</div>
-    <nav>
-      <a href="#">首页</a>
-      <a href="login.html">登录</a>
-    </nav>
+  <!-- 顶部导航 -->
+  <header class="navbar">
+    <div class="logo">🌻 Emovibe</div>
+    <div class="nav-right">
+      <span id="balance">💰 加载中...</span>
+      <button id="loginBtn">登录</button>
+      <button id="signupBtn">注册</button>
+    </div>
   </header>
 
+  <!-- 横幅 -->
   <section class="hero">
-    <h1>遇见温暖的灵魂</h1>
-    <p>选择陪聊师，或开启盲盒，找到你的倾听者 💬</p>
-    <div class="hero-buttons">
-      <button id="openBlindBox">🎁 开启盲盒</button>
-      <button onclick="location.href='#list'">👥 查看陪聊师</button>
-    </div>
+    <h1>一个温暖的陪伴空间 🌼</h1>
+    <p>选择AI朋友，或与真实陪聊师聊天，分享你的故事。</p>
+    <button onclick="window.location.href='./ai/create-character.html'">创建AI角色</button>
   </section>
 
-  <section id="list" class="companions">
-    <h2>我们的陪聊师</h2>
-    <div id="companionsContainer" class="grid"></div>
-  </section>
-
-  <footer>
-    <p>© 2025 EmoVibe | 温暖陪伴，用心倾听</p>
-  </footer>
-
-  <script src="supabaseClient.js"></script>
-  <script src="main.js"></script>
-</body>
-</html>
+  <!-- AI角色展示 -->
+  <section class="characters">
+    <h2>🌟 热门AI角色</h2>
+    <div class="cards">
+      <div class="card">
+        <img src="https://placekitten.com/200/200" alt="AI角色">
+        <h3>暖暖</h3>
+        <p>温柔倾听者，最懂你的心。</p>
+      </div>
+      <div class="card">
+        <img src="https://placebear.com/200/200" alt="AI角色">
+        <h3>阿言</h3>
+        <p>理性与安慰并
