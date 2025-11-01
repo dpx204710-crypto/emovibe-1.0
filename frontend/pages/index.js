@@ -2,16 +2,16 @@ import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div style={{ padding:'2rem', fontFamily:'Arial'}}>
-      <h1>Emovibe - Professional Emotional Support</h1>
-      <p>Connect with AI or professional counselors worldwide.</p>
+    <div style={{padding:'2rem'}}>
+      <h1>Welcome to Emovibe</h1>
+      <p>Professional emotional support platform</p>
       <nav>
-        <Link href="/register">Register</Link> |{' '}
-        <Link href="/login">Login</Link> |{' '}
-        <Link href="/chat">Chat</Link> |{' '}
-        <Link href="/treehole">Tree Hole</Link> |{' '}
-        <Link href="/membership">Membership</Link>
+        <Link href="/register"><a>Register</a></Link> | 
+        <Link href="/login"><a>Login</a></Link> | 
+        <Link href="/chat"><a>Chat</a></Link> | 
+        <Link href="/treehole"><a>Tree Hole</a></Link> | 
+        <Link href="/membership"><a>Membership</a></Link>
       </nav>
     </div>
-  );
+  )
 }
