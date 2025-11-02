@@ -1,4 +1,3 @@
-// components/Header.js
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { supabase } from '../pages/_app';
@@ -17,12 +16,13 @@ export default function Header({ locale, setLocale }) {
   }, []);
 
   return (
-    <header className="header" style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 36px',background:'#007bff',color:'#fff'}}>
+    <header style={{display:'flex',alignItems:'center',justifyContent:'space-between',padding:'16px 36px',background:'#007bff',color:'#fff'}}>
       <div style={{display:'flex',alignItems:'center',gap:16}}>
         <Link href="/"><a style={{color:'white',fontWeight:700,fontSize:22}}>EmoVibe</a></Link>
         <nav style={{display:'flex',gap:16}}>
           <Link href="/"><a style={{color:'white'}}>{locale==='en'?'Home':'首页'}</a></Link>
-          <Link href="/ai-create"><a style={{color:'white'}}>{locale==='en'?'Create AI':'AI创建'}</a></Link>
+          <Link href="/companions"><a style={{color:'white'}}>{locale==='en'?'Real Companions':'真人陪聊师'}</a></Link>
+          <Link href="/ai-create"><a style={{color:'white'}}>{locale==='en'?'AI Create':'AI创建'}</a></Link>
           <Link href="/treehole"><a style={{color:'white'}}>{locale==='en'?'Treehole':'树洞'}</a></Link>
           <Link href="/membership"><a style={{color:'white'}}>{locale==='en'?'Membership':'会员'}</a></Link>
         </nav>
