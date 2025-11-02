@@ -1,29 +1,6 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700&display=swap');
-
-:root{
-  --blue:#007bff;
-  --soft:#e6f7ff;
-  --muted:#64748b;
-}
-*{box-sizing:border-box}
-body{font-family: 'Roboto', sans-serif; margin:0; background:linear-gradient(180deg,#f8fbff,#ffffff); color:#0f172a}
-.header{background:linear-gradient(90deg,var(--blue),#00c8ff);color:white;padding:18px 28px;display:flex;justify-content:space-between;align-items:center}
-.logo{font-weight:700;font-size:22px}
-.nav a{color:white;margin-left:16px;text-decoration:none;font-weight:500}
-.container{max-width:1100px;margin:0 auto;padding:28px}
-.hero{display:flex;gap:28px;align-items:center;justify-content:space-between;padding:48px 0}
-.hero-left{flex:1}
-.hero-right{width:360px}
-.h-title{font-size:34px;color:var(--blue);line-height:1.05;margin-bottom:12px}
-.h-sub{font-size:16px;color:var(--muted);margin-bottom:18px}
-.btn{padding:12px 18px;border-radius:10px;border:none;cursor:pointer}
-.btn-primary{background:var(--blue);color:white}
-.btn-outline{background:transparent;border:2px solid rgba(255,255,255,0.08);color:white}
-.card{background:white;border-radius:12px;padding:18px;box-shadow:0 8px 28px rgba(2,6,23,0.06)}
-.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:18px;margin-top:24px}
-.feature{padding:18px;border-radius:12px;background:linear-gradient(180deg,#fff,#fbfeff);border:1px solid #eef6ff}
-.form-input{width:100%;padding:10px;border:1px solid #e6eef9;border-radius:8px;margin-top:8px}
-.footer{padding:20px;text-align:center;color:var(--muted);margin-top:32px;background:#f1f8ff}
-.small-muted{color:var(--muted);font-size:13px}
-.role-card{display:flex;gap:12px;align-items:center;padding:12px;border-radius:10px;background:#fff;border:1px solid #eef6ff}
-.role-avatar{width:56px;height:56px;border-radius:10px;object-fit:cover}
+body { margin:0; padding:0; font-family: 'Roboto', sans-serif; background:#f5faff; color:#333; }
+h1,h2,h3,h4,h5,h6 { margin:0; }
+a { text-decoration:none; }
+button { cursor:pointer; transition:0.3s; }
+.btn-primary:hover { background:#0056b3; }
+.btn-outline:hover { background:#009ecf; }
