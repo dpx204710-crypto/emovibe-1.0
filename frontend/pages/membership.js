@@ -1,69 +1,41 @@
-// frontend/pages/membership.js
+import axios from 'axios';
+import { supabase } from './_app';
 import { useState, useEffect } from 'react';
 
-export default function Membership() {
-  const [isMember, setIsMember] = useState(false); // 会员状态
-  const [loading, setLoading] = useState(false);
-  const [user, setUser] = useState(null); // 用户信息，可从后端获取
+export default function Membership(){
+  const [status,setStatus] = useState(null);
+  const [loading,setLoading] = useState(false);
 
-  useEffect(() => {
-    // 页面加载时获取用户信息和会员状态
-    const fetchStatus = async () => {
-      try {
-        const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/user/status`, {
-          credentials: 'include'
-        });
-        const data = await res.json();
-        setUser(data.user);
-        setIsMember(data.user?.isMember || false);
-      } catch (err) {
-        console.error('获取用户状态失败', err);
-      }
-    };
-    fetchStatus();
-  }, []);
+  useEffect(()=>{ async function f(){ const user = (await supabase.auth.getUser()).data.user; if(!user) return; const res=await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/subscription-status?userId=${user.id}`); setStatus(res.data); } f(); },[]);
 
-  // 开通会员
-  const subscribe = async () => {
+  const checkout = async () => {
     setLoading(true);
+    const user = (await supabase.auth.getUser()).data.user;
+    const priceId = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID; // set in env
     try {
-      const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/membership/subscribe`, {
-        method: 'POST',
-        credentials: 'include'
+      const { data } = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/api/create-checkout-session`, {
+        userId: user.id,
+        priceId,
+        successUrl: window.location.href,
+        cancelUrl: window.location.href
       });
-      const data = await res.json();
-      if (data.success) {
-        setIsMember(true);
-        alert('会员开通成功！');
-      } else {
-        alert('开通失败，请重试');
-      }
-    } catch (err) {
-      console.error(err);
-      alert('网络错误，请稍后再试');
-    } finally {
-      setLoading(false);
-    }
+      if (data.url) window.location.href = data.url;
+    } catch (err) { console.error(err); alert('Checkout failed'); }
+    finally { setLoading(false); }
   };
 
   return (
-    <div style={{ fontFamily: 'Roboto, sans-serif', padding: '20px', maxWidth: '600px', margin: '0 auto' }}>
-      <h1 style={{ color: '#007bff', textAlign: 'center', marginBottom: '20px' }}>会员中心</h1>
-      
-      {user ? (
-        <div style={{ textAlign: 'center', marginBottom: '30px' }}>
-          <p>欢迎, <strong>{user.name}</strong>!</p>
-          <p>当前会员状态: <strong style={{ color: isMember ? 'green' : 'red' }}>
-            {isMember ? '已开通' : '未开通'}
-          </strong></p>
+    <div className="container" style={{paddingTop:24}}>
+      <div className="card" style={{maxWidth:720,margin:'0 auto'}}>
+        <h2>Membership</h2>
+        <p>Weekly subscription $99 — professional companionship and priority access.</p>
+        <div>
+          <button className="btn btn-primary" onClick={checkout} disabled={loading}>Subscribe $99/week</button>
         </div>
-      ) : (
-        <p style={{ textAlign: 'center' }}>正在加载用户信息...</p>
-      )}
-
-      {!isMember && (
-        <div style={{ textAlign: 'center' }}>
-          <button
-            onClick={subscribe}
-            disabled={loading}
-            style={{ padding: '15px 
+        <div style={{marginTop:12}}>
+          <strong>Status:</strong> {status?.active ? 'Active until ' + status.end_date : 'Not active'}
+        </div>
+      </div>
+    </div>
+  );
+}
