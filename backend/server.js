@@ -206,3 +206,114 @@ app.use((req,res)=> res.status(404).json({ error:'not found' }));
 
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, ()=> console.log(`✅ Backend running on ${PORT}`));
+// ---------- START: Real Companions / Chat Requests API ----------
+// Requires: supabase client (createClient) already configured as `supabase`
+// Assumes you already have `app` (express), bodyParser, etc.
+
+const MEMBER_GRACE_CHECK = async (userId) => {
+  if (!userId) return false;
+  const { data } = await supabase.from('users').select('membership_expires_at').eq('id', userId).single();
+  if (!data?.membership_expires_at) return false;
+  return new Date(data.membership_expires_at) > new Date();
+};
+
+// Middleware to require membership for certain routes (backend guard)
+async function requireMember(req, res, next) {
+  try {
+    // Expect frontend to send userId (or Authorization header and verify token)
+    const userId = req.body.user_id || req.query.userId || (req.headers['x-user-id'] || null);
+    if (!userId) return res.status(401).json({ error: 'login_required', message: 'Please login' });
+    const ok = await MEMBER_GRACE_CHECK(userId);
+    if (!ok) return res.status(403).json({ error: 'membership_required', message: 'This feature is for members only' });
+    req.authUserId = userId;
+    next();
+  } catch (err) {
+    console.error('requireMember error', err);
+    res.status(500).json({ error: 'internal' });
+  }
+}
+
+// 1) List companions (public)
+app.get('/api/companions', async (req, res) => {
+  try {
+    const { data, error } = await supabase.from('companions').select('*').order('created_at', { ascending: false });
+    if (error) return res.status(500).json({ error });
+    res.json({ companions: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// 2) Create companion (admin/owner) - optional (protect this endpoint in production)
+app.post('/api/companions', async (req, res) => {
+  try {
+    const { name, avatar_url, specialization, languages = [], price = null, contact = null, owner_user_id = null } = req.body;
+    if (!name) return res.status(400).json({ error: 'name required' });
+    const { data, error } = await supabase.from('companions').insert([{
+      name, avatar_url, specialization, languages, price, contact, owner_user_id
+    }]).select().single();
+    if (error) return res.status(500).json({ error });
+    res.json({ companion: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// 3) Submit a chat request (custom companion request) - member only
+app.post('/api/chat-requests', requireMember, async (req, res) => {
+  try {
+    const { style, language, gender_pref, request_text, contact } = req.body;
+    const user_id = req.authUserId;
+    // server-side check: require request_text and confirm user agreed to legal terms (frontend should confirm)
+    if (!request_text || request_text.trim().length < 3) return res.status(400).json({ error: 'request_text required' });
+
+    const { data, error } = await supabase.from('chat_requests').insert([{
+      user_id, style, language, gender_pref, request_text, contact, status: 'pending'
+    }]).select().single();
+
+    if (error) return res.status(500).json({ error });
+    // optionally notify companions / admin (email/webhook) - left for integration
+    res.json({ request: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// 4) Companion fetches pending requests (companion must be authenticated on platform) - show only pending
+app.get('/api/chat-requests', async (req, res) => {
+  try {
+    // Optionally can filter by status, or by companion's language capabilities
+    const { status = 'pending', language } = req.query;
+    let q = supabase.from('chat_requests').select('*').eq('status', status).order('created_at', { ascending: true });
+    if (language) q = q.ilike('language', `%${language}%`);
+    const { data, error } = await q;
+    if (error) return res.status(500).json({ error });
+    res.json({ requests: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// 5) Companion accepts a request (companion id provided) - mark accepted_by and status=accepted
+app.post('/api/chat-requests/:id/accept', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { companion_id } = req.body;
+    if (!companion_id) return res.status(400).json({ error: 'companion_id required' });
+
+    // Update request
+    const { data, error } = await supabase.from('chat_requests').update({
+      status: 'accepted', accepted_by: companion_id
+    }).eq('id', id).select().single();
+
+    if (error) return res.status(500).json({ error });
+    // Optionally notify user (email/DM) — left to integrate
+    res.json({ request: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// 6) Companion/owner can mark request completed or cancelled
+app.post('/api/chat-requests/:id/update', async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status } = req.body;
+    if (!['accepted','completed','cancelled'].includes(status)) return res.status(400).json({ error: 'invalid status' });
+    const { data, error } = await supabase.from('chat_requests').update({ status }).eq('id', id).select().single();
+    if (error) return res.status(500).json({ error });
+    res.json({ request: data });
+  } catch (err) { console.error(err); res.status(500).json({ error: 'unexpected' }); }
+});
+
+// ---------- END: Real Companions / Chat Requests API ----------
