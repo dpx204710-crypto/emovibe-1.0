@@ -1,3 +1,4 @@
+<button class="btn btn-secondary" onclick="window.location.href='/custom-chat'">定制真人陪聊师</button>
 import Head from 'next/head';
 import { useState } from 'react';
 import Header from '../components/Header';
