@@ -9,76 +9,63 @@ const Stripe = require('stripe');
 const { v4: uuidv4 } = require('uuid');
 
 const app = express();
-
-// === CORS & body parsing. For Stripe webhook we'll use raw body later ===
 const FRONTEND_HOST = process.env.FRONTEND_HOST || 'http://localhost:3000';
 app.use(cors({ origin: FRONTEND_HOST }));
 app.use(bodyParser.json());
 
-// === clients ===
 const SUPABASE_URL = process.env.SUPABASE_URL;
-const SUPABASE_KEY = process.env.SUPABASE_KEY; // service_role key - backend only
-if (!SUPABASE_URL || !SUPABASE_KEY) {
-  console.error('Missing SUPABASE_URL or SUPABASE_KEY');
-  process.exit(1);
-}
+const SUPABASE_KEY = process.env.SUPABASE_KEY;
+if(!SUPABASE_URL || !SUPABASE_KEY){ console.error('Missing SUPABASE'); process.exit(1); }
 const supabase = createClient(SUPABASE_URL, SUPABASE_KEY);
 
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-if (!OPENAI_API_KEY) {
-  console.error('Missing OPENAI_API_KEY');
-  process.exit(1);
-}
+if(!OPENAI_API_KEY){ console.error('Missing OPENAI_API_KEY'); process.exit(1); }
 const openai = new OpenAIApi(new Configuration({ apiKey: OPENAI_API_KEY }));
 
 const STRIPE_SECRET = process.env.STRIPE_SECRET || '';
 const stripe = STRIPE_SECRET ? Stripe(STRIPE_SECRET) : null;
 
-// ===== Health =====
-app.get('/api/health', (req, res) => res.json({ ok: true }));
+// health
+app.get('/api/health', (req,res) => res.json({ ok:true }));
 
-// ===== AI roles CRUD (existing) =====
+// Create AI role
 app.post('/api/ai-roles', async (req, res) => {
   try {
     const { owner_id = null, name, personality, catchphrase = null, interests = [], avatar_url = null } = req.body;
-    if (!name || !personality) return res.status(400).json({ success: false, message: 'name & personality required' });
-
+    if(!name || !personality) return res.status(400).json({ success:false, message:'name & personality required' });
     const roleId = uuidv4();
-    const payload = { id: roleId, user_id: owner_id, name, personality, catchphrase, interests, avatar_url };
-    const { error } = await supabase.from('ai_roles').insert([payload]);
-    if (error) return res.status(500).json({ success: false, error });
-    return res.json({ success: true, roleId });
-  } catch (err) {
-    console.error(err);
-    return res.status(500).json({ success: false, message: err.message });
-  }
+    const { error } = await supabase.from('ai_roles').insert([{ id: roleId, user_id: owner_id, name, personality, catchphrase, interests, avatar_url }]);
+    if(error) return res.status(500).json({ success:false, error });
+    res.json({ success:true, roleId });
+  } catch(err){ console.error(err); res.status(500).json({ success:false, message:err.message }); }
 });
 
-app.get('/api/ai-roles/:id', async (req, res) => {
+// Get role
+app.get('/api/ai-roles/:id', async (req,res) => {
   try {
     const { id } = req.params;
     const { data, error } = await supabase.from('ai_roles').select('*').eq('id', id).single();
-    if (error) return res.status(404).json({ success: false, message: 'Role not found' });
-    return res.json({ role: data });
-  } catch (err) { return res.status(500).json({ success: false }); }
+    if(error) return res.status(404).json({ success:false, message:'Role not found' });
+    res.json({ role: data });
+  } catch(err){ res.status(500).json({ success:false }); }
 });
 
-// ===== Chat endpoint (OpenAI) - saves to chat_messages/chats =====
-app.post('/api/chat', async (req, res) => {
+// Chat (OpenAI)
+app.post('/api/chat', async (req,res) => {
   try {
     const { message, roleId, user_id } = req.body;
-    if (!message || !roleId) return res.status(400).json({ reply: 'message & roleId required' });
+    if(!message || !roleId) return res.status(400).json({ reply: 'message & roleId required' });
 
     const { data: roleData } = await supabase.from('ai_roles').select('*').eq('id', roleId).single();
-    if (!roleData) return res.status(400).json({ reply: 'Role not found' });
+    if(!roleData) return res.status(400).json({ reply:'Role not found' });
 
     const systemPrompt = `
-You are an empathetic AI companion. Use the role info below to style your replies.
-Role: ${roleData.name}
+You are an empathetic AI companion.
+Role name: ${roleData.name}
 Personality: ${roleData.personality}
-Catchphrase: ${roleData.catchphrase || 'None'}
-Interests: ${roleData.interests ? roleData.interests.join(', ') : 'None'}
-Reply in a supportive, non-judgmental way (1-3 sentences).
+Catchphrase: ${roleData.catchphrase || 'N/A'}
+Interests: ${roleData.interests ? roleData.interests.join(', ') : 'N/A'}
+Reply concisely, kindly and safely.
 `;
 
     const completion = await openai.createChatCompletion({
@@ -87,139 +74,102 @@ Reply in a supportive, non-judgmental way (1-3 sentences).
         { role: 'system', content: systemPrompt },
         { role: 'user', content: message }
       ],
-      max_tokens: 250
-    });
-
-    const reply = completion.data.choices[0].message.content.trim();
-
-    // save messages to chat_messages or chats (try both names)
-    const userMsg = { id: uuidv4(), role_id: roleId, user_id: user_id || null, sender: 'user', message };
-    const botMsg = { id: uuidv4(), role_id: roleId, user_id: user_id || null, sender: 'bot', message: reply };
-
-    // attempt common table names
-    await supabase.from('chat_messages').insert([userMsg, botMsg]).catch(async () => {
-      await supabase.from('chats').insert([
-        { id: userMsg.id, ai_role_id: userMsg.role_id, user_id: userMsg.user_id, message: userMsg.message, sender: 'user' },
-        { id: botMsg.id, ai_role_id: botMsg.role_id, user_id: botMsg.user_id, message: botMsg.message, sender: 'ai' }
-      ]).catch(e=>console.warn('save chat error', e));
-    });
-
-    return res.json({ reply });
-  } catch (err) {
-    console.error('chat error', err);
-    return res.status(500).json({ reply: 'AI reply failed' });
-  }
-});
-
-// ===== Chat history =====
-app.get('/api/chat-history', async (req, res) => {
-  try {
-    const { roleId, userId } = req.query;
-    if (!roleId || !userId) return res.status(400).json({ messages: [] });
-
-    const { data, error } = await supabase
-      .from('chat_messages')
-      .select('*')
-      .eq('role_id', roleId)
-      .eq('user_id', userId)
-      .order('created_at', { ascending: true });
-
-    if (error) {
-      // fallback to chats table shape
-      const { data: fallback } = await supabase.from('chats').select('*').eq('ai_role_id', roleId).eq('user_id', userId).order('created_at', { ascending: true });
-      return res.json({ messages: fallback || [] });
-    }
-    return res.json({ messages: data || [] });
-  } catch (err) { console.error(err); return res.status(500).json({ messages: [] }); }
-});
-
-// ===== Treehole: anonymous posts =====
-app.post('/api/treehole', async (req, res) => {
-  try {
-    const { content, mood = null } = req.body;
-    if (!content || content.trim().length === 0) return res.status(400).json({ success: false, message: 'content required' });
-
-    const { error } = await supabase.from('anonymous_posts').insert([{ content: content.trim(), mood }]);
-    if (error) return res.status(500).json({ success: false, error });
-
-    return res.json({ success: true });
-  } catch (err) { console.error(err); return res.status(500).json({ success: false }); }
-});
-
-app.get('/api/treehole', async (req, res) => {
-  try {
-    const { limit = 50 } = req.query;
-    const { data, error } = await supabase.from('anonymous_posts').select('*').order('created_at', { ascending: false }).limit(parseInt(limit));
-    if (error) return res.status(500).json({ posts: [] });
-    return res.json({ posts: data || [] });
-  } catch (err) { console.error(err); return res.status(500).json({ posts: [] }); }
-});
-
-// ===== Counseling AI support endpoint (short supportive messages) =====
-app.post('/api/counseling', async (req, res) => {
-  try {
-    const { question, locale = 'en-US', user_id = null } = req.body;
-    if (!question || question.trim().length === 0) return res.status(400).json({ success: false, message: 'question required' });
-
-    // System prompt includes safety disclaimer guidance (non-medical)
-    const systemPrompt = `
-You are a supportive, non-judgmental counselor. Provide a short empathetic response (2-4 sentences),
-give 2-3 actionable coping suggestions (simple steps), and list crisis resources if the user indicates suicidal intent.
-Always include a short line: "If you are in immediate danger, contact local emergency services."
-Be concise and kind.
-Locale: ${locale}
-`;
-
-    const completion = await openai.createChatCompletion({
-      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
-      messages: [
-        { role: 'system', content: systemPrompt },
-        { role: 'user', content: question }
-      ],
       max_tokens: 350
     });
 
     const reply = completion.data.choices[0].message.content.trim();
 
-    // optionally record counseling request (for owner privacy, we store user_id if provided)
+    // try write to chat_messages or chats
+    try {
+      await supabase.from('chat_messages').insert([
+        { id: uuidv4(), role_id: roleId, user_id: user_id || null, sender: 'user', message },
+        { id: uuidv4(), role_id: roleId, user_id: user_id || null, sender: 'bot', message: reply }
+      ]);
+    } catch(e){
+      await supabase.from('chats').insert([
+        { id: uuidv4(), ai_role_id: roleId, user_id: user_id || null, message, sender: 'user' },
+        { id: uuidv4(), ai_role_id: roleId, user_id: user_id || null, message: reply, sender: 'ai' }
+      ]).catch(()=>{});
+    }
+
+    res.json({ reply });
+  } catch(err){ console.error(err); res.status(500).json({ reply:'AI failed' }); }
+});
+
+// chat history
+app.get('/api/chat-history', async (req,res) => {
+  try {
+    const { roleId, userId } = req.query;
+    if(!roleId || !userId) return res.status(400).json({ messages: [] });
+    const { data, error } = await supabase.from('chat_messages').select('*').eq('role_id', roleId).eq('user_id', userId).order('created_at', { ascending:true });
+    if(error) {
+      const { data: fallback } = await supabase.from('chats').select('*').eq('ai_role_id', roleId).eq('user_id', userId).order('created_at', { ascending:true });
+      return res.json({ messages: fallback || [] });
+    }
+    res.json({ messages: data || [] });
+  } catch(err){ console.error(err); res.status(500).json({ messages: [] }); }
+});
+
+// Treehole
+app.post('/api/treehole', async (req,res) => {
+  try {
+    const { content, mood = null } = req.body;
+    if(!content || !content.trim()) return res.status(400).json({ success:false, message:'content required' });
+    const { error } = await supabase.from('anonymous_posts').insert([{ content: content.trim(), mood }]);
+    if(error) return res.status(500).json({ success:false, error });
+    res.json({ success:true });
+  } catch(err){ console.error(err); res.status(500).json({ success:false }); }
+});
+app.get('/api/treehole', async (req,res) => {
+  try {
+    const limit = parseInt(req.query.limit || '100', 10);
+    const { data, error } = await supabase.from('anonymous_posts').select('*').order('created_at', { ascending:false }).limit(limit);
+    if(error) return res.status(500).json({ posts: [] });
+    res.json({ posts: data || [] });
+  } catch(err){ console.error(err); res.status(500).json({ posts: [] }); }
+});
+
+// Counseling
+app.post('/api/counseling', async (req,res) => {
+  try {
+    const { question, locale = 'en-US', user_id = null } = req.body;
+    if(!question || !question.trim()) return res.status(400).json({ success:false, message:'question required' });
+
+    const systemPrompt = `
+You are a supportive counselor. Provide an empathetic reply (2-4 sentences), 2-3 simple coping suggestions, and crisis guidance line.
+Locale: ${locale}
+`;
+    const completion = await openai.createChatCompletion({
+      model: process.env.OPENAI_MODEL || 'gpt-3.5-turbo',
+      messages: [{ role:'system', content: systemPrompt }, { role:'user', content: question }],
+      max_tokens: 350
+    });
+    const reply = completion.data.choices[0].message.content.trim();
+
     await supabase.from('chat_messages').insert([{ id: uuidv4(), role_id: null, user_id: user_id || null, sender: 'user', message: question }]).catch(()=>{});
     await supabase.from('chat_messages').insert([{ id: uuidv4(), role_id: null, user_id: user_id || null, sender: 'bot', message: reply }]).catch(()=>{});
 
-    // IMPORTANT: Not a substitute for professional help (client should enforce in frontend)
-    return res.json({ success: true, reply });
-  } catch (err) {
-    console.error('counseling error', err);
-    return res.status(500).json({ success: false, message: 'Counseling AI failed' });
-  }
+    res.json({ success:true, reply });
+  } catch(err){ console.error(err); res.status(500).json({ success:false, message:'Counseling failed' }); }
 });
 
-// ===== Counseling resources (list & admin add) =====
-app.get('/api/counseling-resources', async (req, res) => {
-  try {
-    const { locale = 'en-US' } = req.query;
-    const { data } = await supabase.from('counseling_resources').select('*').eq('locale', locale).order('created_at', { ascending: false }).limit(200);
-    return res.json({ resources: data || [] });
-  } catch (err) { console.error(err); return res.status(500).json({ resources: [] }); }
-});
-
-// ===== Subscription status endpoint =====
-app.get('/api/subscription-status', async (req, res) => {
+// subscription status
+app.get('/api/subscription-status', async (req,res) => {
   try {
     const { userId } = req.query;
-    if (!userId) return res.json({ active: false });
-    const { data } = await supabase.from('subscriptions').select('*').eq('user_id', userId).order('expires_at', { ascending: false }).limit(1).single();
-    if (!data) return res.json({ active: false });
-    return res.json({ active: data.is_active, plan: data.plan, expires_at: data.expires_at });
-  } catch (err) { console.error(err); return res.status(500).json({ active: false }); }
+    if(!userId) return res.json({ active:false });
+    const { data } = await supabase.from('subscriptions').select('*').eq('user_id', userId).order('expires_at', { ascending:false }).limit(1).single();
+    if(!data) return res.json({ active:false });
+    res.json({ active: data.is_active, plan: data.plan, expires_at: data.expires_at });
+  } catch(err){ console.error(err); res.status(500).json({ active:false }); }
 });
 
-// ===== Stripe Checkout & Webhook (if stripe configured) =====
-if (stripe) {
-  app.post('/api/create-checkout-session', async (req, res) => {
+// Stripe (optional)
+if(stripe){
+  app.post('/api/create-checkout-session', async (req,res) => {
     try {
       const { userId, priceId, successUrl, cancelUrl } = req.body;
-      if (!userId || !priceId) return res.status(400).json({ error: 'missing fields' });
-
+      if(!userId || !priceId) return res.status(400).json({ error:'missing' });
       const session = await stripe.checkout.sessions.create({
         mode: 'subscription',
         payment_method_types: ['card'],
@@ -228,44 +178,31 @@ if (stripe) {
         cancel_url: cancelUrl,
         metadata: { userId }
       });
-
-      return res.json({ url: session.url, sessionId: session.id });
-    } catch (err) {
-      console.error('stripe create session error', err);
-      return res.status(500).json({ error: 'stripe error' });
-    }
+      res.json({ url: session.url, sessionId: session.id });
+    } catch(err){ console.error(err); res.status(500).json({ error:'stripe' }); }
   });
 
-  // Stripe webhook needs raw body parser
-  app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), async (req, res) => {
+  app.post('/api/stripe-webhook', bodyParser.raw({ type: 'application/json' }), async (req,res) => {
     const sig = req.headers['stripe-signature'];
     const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
     let event;
-    try {
+    try{
       event = stripe.webhooks.constructEvent(req.body, sig, webhookSecret);
-    } catch (err) {
-      console.error('Webhook signature verification failed.', err.message);
-      return res.status(400).send(`Webhook Error: ${err.message}`);
-    }
+    } catch(err){ console.error('Webhook error', err.message); return res.status(400).send(`Webhook Error: ${err.message}`); }
 
-    // Handle checkout.session.completed to create subscription record
-    if (event.type === 'checkout.session.completed') {
+    if(event.type === 'checkout.session.completed'){
       const session = event.data.object;
       const userId = session.metadata?.userId;
-      if (userId) {
-        // create a weekly subscription record as example (adjust based on price)
-        const expiresAt = new Date(Date.now() + 7 * 24 * 3600 * 1000).toISOString();
-        await supabase.from('subscriptions').insert([{ id: uuidv4(), user_id: userId, plan: 'weekly', price: null, expires_at: expiresAt, is_active: true }]).catch(e => console.error('supabase insert sub', e));
+      if(userId){
+        const expiresAt = new Date(Date.now() + 7*24*3600*1000).toISOString();
+        await supabase.from('subscriptions').insert([{ id: uuidv4(), user_id: userId, plan:'weekly', price:null, expires_at: expiresAt, is_active:true }]).catch(e=>console.error(e));
       }
     }
-
-    // You can handle other events (invoice.paid, customer.subscription.updated, etc.)
-    res.json({ received: true });
+    res.json({ received:true });
   });
 }
 
-// fallback
-app.use((req, res) => res.status(404).json({ error: 'not found' }));
+app.use((req,res)=> res.status(404).json({ error:'not found' }));
 
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`✅ Backend running on port ${PORT}`));
+app.listen(PORT, ()=> console.log(`✅ Backend running on ${PORT}`));
