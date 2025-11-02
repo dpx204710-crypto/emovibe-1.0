@@ -1,49 +1,35 @@
 import Link from 'next/link';
-import styles from '../styles/global.css';
-
-export default function Home() {
+export default function Home(){
   return (
-    <div className="page">
+    <>
       <header className="header">
         <div className="logo">EmoVibe</div>
-        <nav>
-          <Link href="/chat" className="navlink">Chat</Link>
-          <Link href="/ai-create" className="navlink">Create AI</Link>
-          <Link href="/membership" className="navlink">Membership</Link>
+        <nav className="nav">
+          <Link href="/chat"><a>Chat</a></Link>
+          <Link href="/ai-create"><a>Create AI</a></Link>
+          <Link href="/membership"><a>Membership</a></Link>
         </nav>
       </header>
-
-      <section className="hero">
-        <h1>Professional Emotional Companion Platform</h1>
-        <p>Share your thoughts with AI or real people who truly listen.  
-        Create your own AI companion today and start a meaningful journey.</p>
-        <div className="btn-group">
-          <Link href="/membership"><button className="btn primary">Join Now - $99/week</button></Link>
-          <Link href="/ai-create"><button className="btn secondary">Create AI Character</button></Link>
+      <div className="container" style={{display:'flex',gap:24,alignItems:'center',marginTop:32}}>
+        <div style={{flex:1}}>
+          <h1 style={{color:'var(--blue)',fontSize:40}}>Professional Emotional Companion</h1>
+          <p style={{color:'#334155',fontSize:18}}>Create a supportive AI companion or chat with professionals. Your feelings matter — talk anytime.</p>
+          <div style={{marginTop:18}}>
+            <Link href="/membership"><button className="btn btn-primary" style={{marginRight:12}}>Join $99/week</button></Link>
+            <Link href="/ai-create"><button className="btn btn-ghost">Create AI Role</button></Link>
+          </div>
         </div>
-      </section>
-
-      <section className="features">
-        <div className="feature">
-          <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" width="60"/>
-          <h3>Real Companionship</h3>
-          <p>Chat with professional human listeners anytime you need support.</p>
+        <div style={{width:420}}>
+          <div className="card">
+            <h3 style={{margin:0}}>Why EmoVibe?</h3>
+            <ul>
+              <li>Personalized AI companions</li>
+              <li>Secure, private chats</li>
+              <li>Professional listeners (optional)</li>
+            </ul>
+          </div>
         </div>
-        <div className="feature">
-          <img src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png" width="60"/>
-          <h3>Custom AI Roles</h3>
-          <p>Design AI companions that match your ideal personality.</p>
-        </div>
-        <div className="feature">
-          <img src="https://cdn-icons-png.flaticon.com/512/4144/4144725.png" width="60"/>
-          <h3>Safe & Private</h3>
-          <p>All your conversations are encrypted and secure.</p>
-        </div>
-      </section>
-
-      <footer className="footer">
-        &copy; 2025 EmoVibe. Built for comfort & connection.
-      </footer>
-    </div>
+      </div>
+    </>
   );
 }
