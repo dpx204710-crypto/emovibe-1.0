@@ -1,44 +1,49 @@
 import Link from 'next/link';
+import styles from '../styles/global.css';
 
 export default function Home() {
   return (
-    <div style={{fontFamily:'Roboto, sans-serif',background:'#f5faff',minHeight:'100vh'}}>
-      <header style={{background:'#007bff',color:'white',padding:'20px 40px',display:'flex',justifyContent:'space-between',alignItems:'center'}}>
-        <div style={{fontSize:'28px',fontWeight:'700'}}>EmoVibe</div>
+    <div className="page">
+      <header className="header">
+        <div className="logo">EmoVibe</div>
         <nav>
-          <Link href="/chat"><a style={{color:'white',margin:'0 15px'}}>Chat</a></Link>
-          <Link href="/ai-create"><a style={{color:'white',margin:'0 15px'}}>Create AI Role</a></Link>
-          <Link href="/membership"><a style={{color:'white',margin:'0 15px'}}>Membership</a></Link>
+          <Link href="/chat" className="navlink">Chat</Link>
+          <Link href="/ai-create" className="navlink">Create AI</Link>
+          <Link href="/membership" className="navlink">Membership</Link>
         </nav>
       </header>
 
-      <section style={{display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center',height:'70vh',textAlign:'center',background:'linear-gradient(135deg,#e0f0ff,#cce5ff)'}}>
-        <h1 style={{fontSize:'48px',marginBottom:'20px',color:'#007bff'}}>Professional Emotional Chat</h1>
-        <p style={{fontSize:'20px',marginBottom:'30px',maxWidth:'600px'}}>Chat with real humans or AI, share your feelings, and make meaningful connections. Start your journey today!</p>
-        <div>
-          <Link href="/membership"><button style={{padding:'15px 30px',margin:'5px',borderRadius:'6px',border:'none',background:'#007bff',color:'white',cursor:'pointer',transition:'0.3s'}}>Join $99/week</button></Link>
-          <Link href="/ai-create"><button style={{padding:'15px 30px',margin:'5px',borderRadius:'6px',border:'none',background:'#00c8ff',color:'white',cursor:'pointer',transition:'0.3s'}}>Create AI Role</button></Link>
+      <section className="hero">
+        <h1>Professional Emotional Companion Platform</h1>
+        <p>Share your thoughts with AI or real people who truly listen.  
+        Create your own AI companion today and start a meaningful journey.</p>
+        <div className="btn-group">
+          <Link href="/membership"><button className="btn primary">Join Now - $99/week</button></Link>
+          <Link href="/ai-create"><button className="btn secondary">Create AI Character</button></Link>
         </div>
       </section>
 
-      <section style={{display:'flex',justifyContent:'center',gap:'40px',padding:'60px 20px',flexWrap:'wrap'}}>
-        <div style={{background:'white',padding:'30px',borderRadius:'12px',width:'250px',boxShadow:'0 4px 10px rgba(0,0,0,0.1)',textAlign:'center'}}>
-          <h3 style={{marginBottom:'15px',color:'#007bff'}}>Human Chat</h3>
-          <p>Professional chat experts to listen and guide you warmly.</p>
+      <section className="features">
+        <div className="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/4333/4333609.png" width="60"/>
+          <h3>Real Companionship</h3>
+          <p>Chat with professional human listeners anytime you need support.</p>
         </div>
-        <div style={{background:'white',padding:'30px',borderRadius:'12px',width:'250px',boxShadow:'0 4px 10px rgba(0,0,0,0.1)',textAlign:'center'}}>
-          <h3 style={{marginBottom:'15px',color:'#007bff'}}>AI Chat</h3>
-          <p>Create your own AI character for personalized companionship anytime.</p>
+        <div className="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/4712/4712100.png" width="60"/>
+          <h3>Custom AI Roles</h3>
+          <p>Design AI companions that match your ideal personality.</p>
         </div>
-        <div style={{background:'white',padding:'30px',borderRadius:'12px',width:'250px',boxShadow:'0 4px 10px rgba(0,0,0,0.1)',textAlign:'center'}}>
-          <h3 style={{marginBottom:'15px',color:'#007bff'}}>Social Sharing</h3>
-          <p>Share your social profile optionally to connect with friends easily.</p>
+        <div className="feature">
+          <img src="https://cdn-icons-png.flaticon.com/512/4144/4144725.png" width="60"/>
+          <h3>Safe & Private</h3>
+          <p>All your conversations are encrypted and secure.</p>
         </div>
       </section>
 
-      <footer style={{textAlign:'center',padding:'20px',background:'#e0f0ff',marginTop:'40px'}}>
-        &copy; 2025 EmoVibe. All Rights Reserved.
+      <footer className="footer">
+        &copy; 2025 EmoVibe. Built for comfort & connection.
       </footer>
     </div>
-  )
+  );
 }
