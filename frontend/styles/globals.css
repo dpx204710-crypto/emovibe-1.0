@@ -2,5 +2,4 @@ body { margin:0; padding:0; font-family: 'Roboto', sans-serif; background:#f5faf
 h1,h2,h3,h4,h5,h6 { margin:0; }
 a { text-decoration:none; }
 button { cursor:pointer; transition:0.3s; }
-.btn-primary:hover { background:#0056b3; }
-.btn-outline:hover { background:#009ecf; }
+input,textarea { font-family: inherit; font-size: 14px; }
