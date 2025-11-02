@@ -1,5 +1,53 @@
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+body {
+  margin: 0;
+  font-family: 'Roboto', sans-serif;
+  background: #f5faff;
+  color: #333;
+}
+.header {
+  background: linear-gradient(90deg, #007bff, #00c8ff);
+  color: white;
+  padding: 20px 40px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.navlink { color:white; margin:0 15px; text-decoration:none; font-weight:500; }
+.navlink:hover { text-decoration:underline; }
 
-body { font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial; }
+.hero {
+  text-align:center;
+  padding:100px 20px;
+  background:linear-gradient(120deg,#cce5ff,#e0f7ff);
+}
+.hero h1 { font-size:48px; color:#007bff; }
+.hero p { max-width:600px; margin:20px auto; font-size:18px; }
+
+.btn { padding:15px 30px; border:none; border-radius:8px; cursor:pointer; font-size:16px; transition:0.3s; }
+.btn.primary { background:#007bff; color:white; }
+.btn.primary:hover { background:#0056b3; transform:scale(1.05); }
+.btn.secondary { background:#00c8ff; color:white; }
+.btn.secondary:hover { background:#009ecf; transform:scale(1.05); }
+
+.features {
+  display:flex; justify-content:center; flex-wrap:wrap; gap:30px; padding:60px 20px;
+}
+.feature {
+  background:white; padding:30px; border-radius:12px;
+  width:250px; box-shadow:0 4px 10px rgba(0,0,0,0.1);
+  text-align:center; transition:transform 0.3s;
+}
+.feature:hover { transform:translateY(-5px); }
+
+.footer { text-align:center; padding:20px; background:#e0f0ff; }
+
+.chat-page { max-width:600px; margin:40px auto; display:flex; flex-direction:column; }
+.chat-header { font-size:22px; text-align:center; background:#007bff; color:white; padding:10px; border-radius:8px 8px 0 0; }
+.chat-box { background:white; border:1px solid #ccc; border-radius:0 0 8px 8px; height:400px; overflow-y:scroll; padding:15px; }
+.bubble { display:flex; margin:10px 0; align-items:flex-start; }
+.bubble.user { justify-content:flex-end; }
+.bubble .msg { padding:10px 15px; border-radius:15px; max-width:70%; }
+.bubble.user .msg { background:#007bff; color:white; border-top-right-radius:0; }
+.bubble.ai .msg { background:#e0f0ff; color:#007bff; border-top-left-radius:0; }
+.avatar { width:40px; height:40px; border-radius:50%; margin:0 10px; }
+.chat-input { display:flex; margin-top:10px; }
+.chat-input input { flex:1; padding:10px; border-radius:8px; border:1px solid #ccc; }
+.chat-input button { margin-left:10px; padding:10px 20px; border:none; border-radius:8px; background:#007bff; color:white; cursor:pointer; }
