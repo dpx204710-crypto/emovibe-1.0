@@ -1,27 +1,28 @@
+// frontend/pages/register.js
+import { supabase } from './_app';
 import { useState } from 'react';
+import { useRouter } from 'next/router';
 
-export default function Login() {
+export default function Register(){
   const [email,setEmail]=useState('');
   const [password,setPassword]=useState('');
-  const [message,setMessage]=useState('');
+  const router=useRouter();
 
-  const handleLogin=async()=>{
-    const res=await fetch('http://localhost:3000/login',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({email,password})
-    });
-    const data=await res.json();
-    setMessage(data.message||data.error);
-  }
+  const handleRegister = async () => {
+    const { data, error } = await supabase.auth.signUp({ email, password });
+    if (error) return alert(error.message);
+    alert('Check email for confirmation (if enabled).');
+    router.push('/login');
+  };
 
   return (
-    <div style={{padding:'2rem'}}>
-      <h1>Login</h1>
-      <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} /><br/>
-      <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} /><br/>
-      <button onClick={handleLogin}>Login</button>
-      <p>{message}</p>
+    <div className="container">
+      <div style={{maxWidth:420,margin:'40px auto'}} className="card">
+        <h3>Register</h3>
+        <input placeholder="Email" value={email} onChange={e=>setEmail(e.target.value)} style={{width:'100%',padding:8,margin:'8px 0'}}/>
+        <input type="password" placeholder="Password" value={password} onChange={e=>setPassword(e.target.value)} style={{width:'100%',padding:8,margin:'8px 0'}}/>
+        <button className="btn btn-primary" onClick={handleRegister}>Register</button>
+      </div>
     </div>
   )
 }
