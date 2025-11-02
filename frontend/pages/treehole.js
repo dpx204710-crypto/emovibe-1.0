@@ -1,41 +1,56 @@
-import { useState, useEffect } from 'react';
-import { API_BASE_URL } from '../config';
+import { useEffect, useState } from 'react';
+import axios from 'axios';
 
-export default function TreeHole() {
-  const [holes,setHoles] = useState([]);
-  const [content,setContent] = useState('');
+export default function Treehole(){
+  const API = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000/api';
+  const [content,setContent]=useState('');
+  const [mood,setMood]=useState('');
+  const [posts,setPosts]=useState([]);
 
-  const fetchHoles = async ()=>{
-    const res = await fetch(`${API_BASE_URL}/tree_holes`);
-    const data = await res.json();
-    setHoles(data);
-  }
+  const fetchPosts = async ()=> {
+    try {
+      const res = await axios.get(`${API}/treehole?limit=200`);
+      setPosts(res.data.posts || []);
+    } catch (err) { console.error(err); }
+  };
 
-  const postHole = async ()=>{
-    if(!content) return;
-    await fetch(`${API_BASE_URL}/tree_holes`, {
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({user_id:'user1', content})
-    });
-    setContent('');
-    fetchHoles();
-  }
+  useEffect(()=>{ fetchPosts(); },[]);
 
-  useEffect(()=>{ fetchHoles() },[]);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if(!content.trim()) return alert('Please write something / 请写点内容');
+    try {
+      await axios.post(`${API}/treehole`, { content: content.trim(), mood });
+      setContent(''); setMood('');
+      fetchPosts();
+      alert('Posted anonymously / 匿名发布成功');
+    } catch (err) { console.error(err); alert('Failed to post / 发布失败'); }
+  };
 
   return (
-    <div style={{padding:'2rem'}}>
-      <h1>Tree Hole</h1>
-      <textarea value={content} onChange={e=>setContent(e.target.value)} rows={3} cols={50}></textarea><br/>
-      <button onClick={postHole}>Post</button>
-      <div style={{marginTop:'1rem'}}>
-        {holes.map(h=>(
-          <div key={h.id} style={{border:'1px solid #ccc',padding:'0.5rem',margin:'0.5rem 0'}}>
-            {h.content}
+    <div className="container">
+      <div style={{maxWidth:800,margin:'24px auto'}}>
+        <h2>Treehole · 匿名树洞</h2>
+        <form onSubmit={handleSubmit}>
+          <textarea className="form-input" rows={5} value={content} onChange={e=>setContent(e.target.value)} placeholder="Share your feelings anonymously... / 匿名分享你的心情..." />
+          <input className="form-input" placeholder="Mood (optional) / 情绪（可选）" value={mood} onChange={e=>setMood(e.target.value)} />
+          <div style={{marginTop:8}}>
+            <button className="btn btn-primary" type="submit">Post Anonymously / 匿名发布</button>
           </div>
-        ))}
+        </form>
+
+        <hr style={{margin:'20px 0'}}/>
+        <h3>Recent posts / 最新帖子</h3>
+        <div>
+          {posts.map(p=>(
+            <div key={p.id} className="card" style={{marginTop:12}}>
+              <div className="small-muted">{new Date(p.created_at).toLocaleString()}</div>
+              <div style={{marginTop:8}}>{p.content}</div>
+              {p.mood && <div className="small-muted" style={{marginTop:6}}>Mood: {p.mood}</div>}
+            </div>
+          ))}
+        </div>
       </div>
     </div>
-  )
+  );
 }
