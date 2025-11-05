@@ -1,74 +1,60 @@
-import Navbar from "../components/Navbar";
-import Link from "next/link";
+import Header from '../components/Header';
+import Link from 'next/link';
 
 export default function Home() {
   return (
-    <div style={styles.container}>
-      <Navbar />
-      <main style={styles.main}>
-        <h1 style={styles.title}>💬 Emovibe 专业陪聊 & 情绪疗愈平台</h1>
-        <p style={styles.subtitle}>
-          AI自定义陪聊角色 + 真人定制陪聊 + 每周会员制体验
+    <div>
+      <Header />
+      <main style={{
+        maxWidth: '900px',
+        margin: '100px auto',
+        textAlign: 'center',
+        padding: '20px'
+      }}>
+        <h1 style={{ color: '#007bff', fontSize: '2.5em' }}>Emovibe 1.0</h1>
+        <p style={{ marginTop: '10px', color: '#555' }}>
+          Your Emotion Companion Platform — where you can customize human or AI companionship.
         </p>
 
-        <div style={styles.buttons}>
-          <Link href="/ai-custom">
-            <button style={styles.btn}>🤖 自定义AI陪聊师</button>
+        <div style={{
+          marginTop: '40px',
+          display: 'flex',
+          justifyContent: 'center',
+          gap: '20px'
+        }}>
+          <Link href="/custom-chat">
+            <button style={{
+              background: '#007bff',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '14px 30px',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}>
+              💬 Custom Real Chat
+            </button>
           </Link>
-          <Link href="/real-custom">
-            <button style={styles.btn}>🧍 真人定制陪聊</button>
-          </Link>
-          <Link href="/pay">
-            <button style={styles.vip}>💎 开通会员</button>
+
+          <Link href="/ai-companion">
+            <button style={{
+              background: '#28a745',
+              color: 'white',
+              border: 'none',
+              borderRadius: '8px',
+              padding: '14px 30px',
+              cursor: 'pointer',
+              fontSize: '16px'
+            }}>
+              🤖 AI Chat Companion
+            </button>
           </Link>
         </div>
+
+        <p style={{ marginTop: '40px', fontSize: '14px', color: '#999' }}>
+          Emovibe © 2025 — Connect, Feel, Grow.
+        </p>
       </main>
     </div>
   );
 }
-
-const styles = {
-  container: {
-    minHeight: "100vh",
-    background: "linear-gradient(120deg, #667eea, #764ba2)",
-    color: "white",
-    fontFamily: "'Poppins', 'Noto Sans SC', sans-serif",
-  },
-  main: {
-    paddingTop: "120px",
-    textAlign: "center",
-  },
-  title: {
-    fontSize: "32px",
-    fontWeight: "bold",
-  },
-  subtitle: {
-    fontSize: "18px",
-    marginTop: "10px",
-  },
-  buttons: {
-    marginTop: "40px",
-    display: "flex",
-    justifyContent: "center",
-    gap: "20px",
-    flexWrap: "wrap",
-  },
-  btn: {
-    background: "#00c8ff",
-    border: "none",
-    color: "white",
-    padding: "14px 28px",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
-  vip: {
-    background: "#ff69b4",
-    border: "none",
-    color: "white",
-    padding: "14px 28px",
-    borderRadius: "10px",
-    cursor: "pointer",
-    fontSize: "16px",
-  },
-};
