@@ -5,8 +5,11 @@
   "outputDirectory": "frontend/.next",
   "installCommand": "cd frontend && npm install",
   "devCommand": "cd frontend && npm run dev",
-  "ignoreCommand": "git diff --quiet HEAD^ HEAD frontend/",
+  "rootDirectory": "frontend",
   "rewrites": [
-    { "source": "/(.*)", "destination": "/frontend/$1" }
+    {
+      "source": "/(.*)",
+      "destination": "/frontend/$1"
+    }
   ]
 }
