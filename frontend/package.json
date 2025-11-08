@@ -1,14 +1,38 @@
 {
-  "name": "emovibe-1-0",
+  "name": "emovibe-frontend",
   "version": "1.0.0",
+  "private": true,
   "scripts": {
     "dev": "next dev",
     "build": "next build",
-    "start": "next start"
+    "start": "next start",
+    "lint": "next lint"
   },
   "dependencies": {
-    "next": "^14.0.0",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0"
-  }
+    "@supabase/supabase-js": "^2.43.4",
+    "axios": "^1.7.2",
+    "next": "14.2.3",
+    "openai": "^4.52.0",
+    "react": "18.3.1",
+    "react-dom": "18.3.1"
+  },
+  "devDependencies": {
+    "eslint": "8.57.0",
+    "eslint-config-next": "14.2.3"
+  },
+  "engines": {
+    "node": ">=18.17.0"
+  },
+  "description": "Emovibe - AI emotional chat platform for global users, powered by Next.js + Supabase + OpenAI.",
+  "keywords": [
+    "nextjs",
+    "supabase",
+    "openai",
+    "chat",
+    "emotion",
+    "ai",
+    "react"
+  ],
+  "author": "emovibe team",
+  "license": "MIT"
 }
