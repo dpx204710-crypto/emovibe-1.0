@@ -1,6 +1,13 @@
+/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: true,
   output: 'standalone',
-  eslint: { ignoreDuringBuilds: true }
+  experimental: {
+    appDir: false
+  },
+  images: {
+    domains: ['avatars.githubusercontent.com', 'lh3.googleusercontent.com']
+  }
 };
-module.exports = nextConfig;
+
+export default nextConfig;
