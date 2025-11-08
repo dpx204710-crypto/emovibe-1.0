@@ -1,11 +1,6 @@
-import '../styles/global.css';
-import { createClient } from '@supabase/supabase-js';
+// frontend/pages/_app.js
+import '../styles/globals.css'
 
-export const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-);
-
-export default function App({ Component, pageProps }) {
-  return <Component {...pageProps} />;
+export default function MyApp({ Component, pageProps }) {
+  return <Component {...pageProps} />
 }
